@@ -6,11 +6,15 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.mygdx.game.utils.TiledObjectUtil;
 
 import static com.mygdx.game.utils.Constants.PPM;
 import static jdk.jfr.internal.consumer.EventLog.update;
@@ -29,6 +33,9 @@ public class MyGdxGame extends ApplicationAdapter {
 	private SpriteBatch batch;
 	private Texture texture;
 
+	private OrthogonalTiledMapRenderer tmr;
+	private TiledMap map;
+
 	@Override
 	public void create () {
 		float w = Gdx.graphics.getWidth();
@@ -46,6 +53,18 @@ public class MyGdxGame extends ApplicationAdapter {
 		batch = new SpriteBatch();
 		texture = new Texture("download-compresskaru.com.png");
 
+		map = new TmxMapLoader().load("map.tmx");
+		tmr = new OrthogonalTiledMapRenderer(map);
+
+//		Vector3 pos = camera.position;
+//		pos.x = 5000 * PPM;
+//		pos.y = player.getPosition().y * PPM;
+		camera.position.set(768, 817389123, 0);
+
+		camera.update();
+
+		TiledObjectUtil.parseTiledObjectLayer(world, map.getLayers().get("Testing").getObjects());
+
 
 
 
@@ -57,6 +76,10 @@ public class MyGdxGame extends ApplicationAdapter {
 
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(Gdx.gl.GL_COLOR_BUFFER_BIT);
+
+
+
+		tmr.render();
 
 		batch.begin();
 		batch.draw(texture, player.getPosition().x * PPM - (texture.getWidth() / 2), player.getPosition().y * PPM - (texture.getHeight() / 2));
@@ -81,6 +104,9 @@ public class MyGdxGame extends ApplicationAdapter {
 		world.dispose();
 		b2dr.dispose();
 		batch.dispose();
+		texture.dispose();
+		tmr.dispose();
+		map.dispose();
 	}
 
 	public void inputUpdate(float delta){
@@ -89,23 +115,22 @@ public class MyGdxGame extends ApplicationAdapter {
 
 		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
 			horizontalForce -= 1;
-			player.setLinearVelocity(horizontalForce * 5, player.getLinearVelocity().y);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
 			horizontalForce += 1;
-			player.setLinearVelocity(horizontalForce * 5, player.getLinearVelocity().y);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.UP)){
 			verticalForce += 1;
-			player.setLinearVelocity(player.getLinearVelocity().x, verticalForce * 5);
 		}
 		if(Gdx.input.isKeyPressed(Input.Keys.DOWN)){
 			verticalForce -= 1;
-			player.setLinearVelocity(player.getLinearVelocity().x, verticalForce * 5);
 		}
 
-
-
+		if(horizontalForce == 0 && verticalForce == 0) {
+			player.setLinearVelocity(0, 0);
+		} else {
+			player.setLinearVelocity(horizontalForce * 5, verticalForce * 5);
+		}
 	}
 
 	public void update(float delta) {
@@ -113,14 +138,30 @@ public class MyGdxGame extends ApplicationAdapter {
 
 		inputUpdate(delta);
 		cameraUpdate(delta);
+//		camera.update();
+		tmr.setView(camera);
 		batch.setProjectionMatrix(camera.combined);
 	}
 
 	public void cameraUpdate(float delta) {
-		Vector3 pos = camera.position;
-		pos.x = player.getPosition().x * PPM;
-		pos.y = player.getPosition().y * PPM;
-		camera.position.set(pos);
+//		Vector3 pos = camera.position;
+//		pos.x = player.getPosition().x * PPM;
+//		pos.y = player.getPosition().y * PPM;
+//		camera.position.set(pos);
+
+		// Get the map's width and height in tiles
+		int mapWidthInTiles = map.getProperties().get("width", Integer.class);
+		int mapHeightInTiles = map.getProperties().get("height", Integer.class);
+
+		// Get the tile size
+		int tileSize = map.getProperties().get("tilewidth", Integer.class);
+
+		// Calculate the map's width and height in pixels
+		float mapWidthInPixels = mapWidthInTiles * tileSize;
+		float mapHeightInPixels = mapHeightInTiles * tileSize;
+
+		camera.position.set(mapWidthInPixels / 2, mapHeightInPixels / 2, 0);
+		camera.zoom = 1.3f;
 
 		camera.update();
 	}

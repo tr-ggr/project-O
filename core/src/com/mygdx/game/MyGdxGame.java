@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -14,25 +15,28 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.mygdx.game.model.Player;
+import com.mygdx.game.model.Task;
+import com.mygdx.game.utils.CollisionListener;
 import com.mygdx.game.utils.TiledObjectUtil;
 
 import static com.mygdx.game.utils.Constants.PPM;
 import static jdk.jfr.internal.consumer.EventLog.update;
 
-public class MyGdxGame extends ApplicationAdapter {
+public class MyGdxGame extends Game {
 	private boolean DEBUG = false;
 	private final float SCALE = 2.0f;
 
-	private OrthographicCamera camera;
-
 	private World world;
-	private Body player, platform;
+	private Body platform;
+	private Player player;
 
 	private Box2DDebugRenderer b2dr;
 
-	private SpriteBatch batch;
-	private Texture texture;
+	public SpriteBatch batch;
+	public OrthographicCamera camera;
 
+	private Texture texture;
 	private OrthogonalTiledMapRenderer tmr;
 	private TiledMap map;
 
@@ -46,9 +50,9 @@ public class MyGdxGame extends ApplicationAdapter {
 
 		world = new World(new Vector2(0, 0), false);
 		b2dr = new Box2DDebugRenderer();
+		world.setContactListener(new CollisionListener());
 
-		player = createBox(0, 0,32, 32, false);
-		platform = createBox(30, 30,50, 16, true);
+		player = new Player(world);
 
 		batch = new SpriteBatch();
 		texture = new Texture("download-compresskaru.com.png");
@@ -82,7 +86,7 @@ public class MyGdxGame extends ApplicationAdapter {
 		tmr.render();
 
 		batch.begin();
-		batch.draw(texture, player.getPosition().x * PPM - (texture.getWidth() / 2), player.getPosition().y * PPM - (texture.getHeight() / 2));
+		batch.draw(texture, player.body.getPosition().x * PPM - (texture.getWidth() / 2), player.body.getPosition().y * PPM - (texture.getHeight() / 2));
 		batch.end();
 
 		b2dr.render(world, camera.combined.scl(PPM));
@@ -92,6 +96,8 @@ public class MyGdxGame extends ApplicationAdapter {
 		if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)){
 			Gdx.app.exit();
 		}
+
+		super.render();
 	}
 
 	@Override
@@ -109,34 +115,11 @@ public class MyGdxGame extends ApplicationAdapter {
 		map.dispose();
 	}
 
-	public void inputUpdate(float delta){
-		int horizontalForce = 0;
-		int verticalForce = 0;
 
-		if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-			horizontalForce -= 1;
-		}
-		if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-			horizontalForce += 1;
-		}
-		if(Gdx.input.isKeyPressed(Input.Keys.UP)){
-			verticalForce += 1;
-		}
-		if(Gdx.input.isKeyPressed(Input.Keys.DOWN)){
-			verticalForce -= 1;
-		}
-
-		if(horizontalForce == 0 && verticalForce == 0) {
-			player.setLinearVelocity(0, 0);
-		} else {
-			player.setLinearVelocity(horizontalForce * 5, verticalForce * 5);
-		}
-	}
 
 	public void update(float delta) {
 		world.step(1/60f, 6, 2);
-
-		inputUpdate(delta);
+		player.inputUpdate(delta);
 		cameraUpdate(delta);
 //		camera.update();
 		tmr.setView(camera);
@@ -179,7 +162,12 @@ public class MyGdxGame extends ApplicationAdapter {
 		PolygonShape shape = new PolygonShape();
 		shape.setAsBox( w / 2 / PPM,  h / 2 / PPM);
 
-		pBody.createFixture(shape, 1.0f);
+		FixtureDef playerFixture = new FixtureDef();
+		playerFixture.shape = shape;
+
+
+		Fixture fixture = pBody.createFixture(shape, 1.0f);
+		fixture.setUserData("player");
 		shape.dispose();
 
 		return pBody;

@@ -6,10 +6,15 @@ import com.badlogic.gdx.maps.objects.PolylineMapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
+import com.mygdx.game.model.Task;
+
+import java.util.ArrayList;
 
 import static com.mygdx.game.utils.Constants.PPM;
 
 public class TiledObjectUtil {
+    public static ArrayList<Task> tasks = new ArrayList<Task>();
+
     public static void parseTiledObjectLayer(World world, MapObjects objects) {
         for (MapObject object : objects) {
             Shape shape;
@@ -28,6 +33,21 @@ public class TiledObjectUtil {
             bdef.type = BodyDef.BodyType.StaticBody;
             body = world.createBody(bdef);
             body.createFixture(shape, 1);
+
+            FixtureDef objectFixture = new FixtureDef();
+            objectFixture.shape = shape;
+            objectFixture.density = 1.0f;
+
+            body = world.createBody(bdef);
+            body.createFixture(objectFixture).setUserData(object.getName());
+
+            Object timeProperty = object.getProperties().get("Time");
+            if (timeProperty != null) {
+                tasks.add(new Task(object.getName(), Integer.parseInt(timeProperty.toString())));
+            } else {
+                System.out.println("Warning: Time property is missing for object " + object.getName());
+            }
+
 
             shape.dispose();
         }

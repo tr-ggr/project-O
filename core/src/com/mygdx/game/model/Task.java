@@ -25,8 +25,8 @@ public class Task {
     }
 
     public void interactTimer(){
+        System.out.println(thread.getState());
         if(thread.getState().equals(Thread.State.TERMINATED)) {
-            runnableTimer = new TaskTimer(time);
             thread = new Thread(runnableTimer);
         }
         if(thread.getState().equals(Thread.State.NEW)) thread.start();

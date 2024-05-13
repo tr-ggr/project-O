@@ -40,6 +40,7 @@ public class MyGdxGame extends Game {
 	private OrthogonalTiledMapRenderer tmr;
 	private TiledMap map;
 
+
 	@Override
 	public void create () {
 		float w = Gdx.graphics.getWidth();
@@ -63,7 +64,7 @@ public class MyGdxGame extends Game {
 //		Vector3 pos = camera.position;
 //		pos.x = 5000 * PPM;
 //		pos.y = player.getPosition().y * PPM;
-		camera.position.set(768, 817389123, 0);
+//		camera.position.set(768, 817389123, 0);
 
 		camera.update();
 
@@ -87,6 +88,13 @@ public class MyGdxGame extends Game {
 
 		batch.begin();
 		batch.draw(texture, player.body.getPosition().x * PPM - (texture.getWidth() / 2), player.body.getPosition().y * PPM - (texture.getHeight() / 2));
+//		batch.draw(texture, player.body.getPosition().x * PPM - (texture.getWidth() / 2) + 50, player.body.getPosition().y * PPM - (texture.getHeight() / 2));
+
+		// Draw tasks
+		for(Task task : TiledObjectUtil.tasks){
+			task.drawTask(batch);
+		}
+
 		batch.end();
 
 		b2dr.render(world, camera.combined.scl(PPM));

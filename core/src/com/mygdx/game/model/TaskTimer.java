@@ -4,6 +4,7 @@ package com.mygdx.game.model;
 public class TaskTimer implements Runnable{
     private final int time;
     public boolean isPaused = false;
+    public int timeLeft;
 
     public TaskTimer(int time){
         this.time = time;
@@ -12,6 +13,7 @@ public class TaskTimer implements Runnable{
     @Override
     public void run() {
         for(int i = 0; i < time; i++) {
+            timeLeft = time - (i);
             synchronized(this){
                 while(isPaused){
                     try {
@@ -28,7 +30,7 @@ public class TaskTimer implements Runnable{
                 Thread.currentThread().interrupt();
                 return;
             }
-            System.out.println((time - (i)) + " seconds left!");
+            System.out.println(timeLeft + " seconds left!");
         }
         System.out.println("Task completed!");
     }

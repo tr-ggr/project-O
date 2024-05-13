@@ -32,18 +32,20 @@ public class TiledObjectUtil {
             BodyDef bdef = new BodyDef();
             bdef.type = BodyDef.BodyType.StaticBody;
             body = world.createBody(bdef);
-            body.createFixture(shape, 1);
-
-            FixtureDef objectFixture = new FixtureDef();
-            objectFixture.shape = shape;
-            objectFixture.density = 1.0f;
-
-            body = world.createBody(bdef);
-            body.createFixture(objectFixture).setUserData(object.getName());
+//            body.createFixture(shape, 1);
+            body.createFixture(shape, 1).setUserData(object.getName());
+//
+//            FixtureDef objectFixture = new FixtureDef();
+//            objectFixture.shape = shape;
+//            objectFixture.density = 1.0f;
+//
+//            body = world.createBody(bdef);
+//            body.createFixture(objectFixture).setUserData(object.getName());
 
             Object timeProperty = object.getProperties().get("Time");
             if (timeProperty != null) {
-                tasks.add(new Task(object.getName(), Integer.parseInt(timeProperty.toString())));
+                System.out.println(((RectangleMapObject) object).getRectangle());
+                tasks.add(new Task(object.getName(), Integer.parseInt(timeProperty.toString()), ((RectangleMapObject) object).getRectangle()));
             } else {
                 System.out.println("Warning: Time property is missing for object " + object.getName());
             }

@@ -290,8 +290,8 @@ public class MyGdxGame extends Game {
 		System.out.println("Removing food!");
 		for(Iterator<Body> iterator = toBeDeleted.iterator(); iterator.hasNext();){
 			Body body = iterator.next();
-//			body.setActive(false);
 			world.destroyBody(body);
+			body.setActive(false);
 			iterator.remove();
 		}
 	}

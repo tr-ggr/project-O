@@ -2,21 +2,32 @@ package com.mygdx.game.model;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.utils.TiledObjectUtil;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
+import static com.mygdx.game.MyGdxGame.*;
 import static com.mygdx.game.utils.TiledObjectUtil.*;
 import static com.mygdx.game.utils.Constants.PPM;
 
 public class Player{
     public Body body;
-    public static Fixture interactedFixture;
+    public Fixture interactedFixture;
+    public Body interactedFood;
+    public boolean isGrabbing = false;
+    public Sprite sprite;
+
+    public ArrayList<Body> interactedList = new ArrayList<>();
 
     public Player(World world){
-        createPlayerBody(world, 0, 0, 32, 32);
+        createPlayerBody(world, 200, 200, 32, 32);
+        sprite = new Sprite(new Texture("download-compresskaru.com.png"));
     }
 
     public void inputUpdate(float delta){
@@ -25,25 +36,58 @@ public class Player{
 
         if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
             horizontalForce -= 1;
-//            System.out.println("Facing Left " + (body.getPosition().x - 1));
+            body.setTransform(body.getPosition(), (float) Math.PI);
+            sprite.setRotation(180);
         }
         if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
             horizontalForce += 1;
-//            System.out.println("Facing Right " + (body.getPosition().x + 1));
+            body.setTransform(body.getPosition(), 0f);
+            sprite.setRotation(0);
         }
         if(Gdx.input.isKeyPressed(Input.Keys.UP)){
             verticalForce += 1;
-//            System.out.println("Facing Up " + (body.getPosition().y + 1));
+            body.setTransform(body.getPosition(), (float) (Math.PI / 2));
+            sprite.setRotation(90);
         }
         if(Gdx.input.isKeyPressed(Input.Keys.DOWN)){
             verticalForce -= 1;
-//            System.out.println("Facing Down " + (body.getPosition().y - 1));
+            body.setTransform(body.getPosition(), (float) (3 * Math.PI / 2));
+            sprite.setRotation(270);
         }
 
         if(horizontalForce == 0 && verticalForce == 0) {
             body.setLinearVelocity(0, 0);
         } else {
             body.setLinearVelocity(horizontalForce * 5, verticalForce * 5);
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.Z)){
+            isGrabbing = true;
+            System.out.println("Now grabbing!");
+        }
+
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.C)){
+            if (interactedList.isEmpty()) {
+                System.out.println("No food");
+                return;
+            } else {
+
+                for(Body b: interactedList ){
+                    System.out.println(b);
+                }
+            }
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.X)){
+            System.out.println("Successfully dropped food!");
+            isGrabbing = false;
+
+            interactedList.clear();
+            if(grabFood != null) {
+                world.destroyJoint(grabFood);
+                grabFood = null;
+            }
         }
 
 
@@ -80,7 +124,14 @@ public class Player{
         playerFixture.density = 1.0f;
 
 
+
+
         this.body = world.createBody(def);
         this.body.createFixture(playerFixture).setUserData("Player");
+    }
+
+    public void draw(Batch batch){
+        sprite.setPosition(body.getPosition().x * PPM - sprite.getWidth() / 2, body.getPosition().y * PPM - sprite.getHeight() / 2);
+        sprite.draw(batch);
     }
 }

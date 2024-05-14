@@ -1,7 +1,18 @@
 // TaskTimer.java
 package com.mygdx.game.model;
 
-public class TaskTimer implements Runnable{
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+
+
+import java.util.Observable;
+
+import static com.mygdx.game.MyGdxGame.world;
+import static com.mygdx.game.utils.Constants.PPM;
+
+public class TaskTimer extends Observable implements Runnable{
     private final int time;
     public boolean isPaused = false;
     public int timeLeft;
@@ -32,6 +43,11 @@ public class TaskTimer implements Runnable{
             }
             System.out.println(timeLeft + " seconds left!");
         }
-        System.out.println("Task completed!");
+//        System.out.println("Task completed!");
+        // Notify observers that the task is completed
+        setChanged();
+        notifyObservers();
     }
+
+
 }

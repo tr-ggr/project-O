@@ -1,14 +1,23 @@
 // Task.java
 package com.mygdx.game.model;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.Body;
 
+
+import java.util.Observable;
+import java.util.Observer;
+
+import static com.mygdx.game.MyGdxGame.foods;
+import static com.mygdx.game.MyGdxGame.generateFood;
 import static com.mygdx.game.utils.Constants.PPM;
 
-public class Task {
+public class Task implements Observer {
     public String name;
     public TaskTimer runnableTimer;
     public Thread thread;
@@ -22,6 +31,7 @@ public class Task {
         this.runnableTimer = new TaskTimer(time);
         this.thread = new Thread(runnableTimer);
         this.body = body;
+        this.runnableTimer.addObserver(this);
     }
 
     public void interactTimer(){
@@ -65,6 +75,15 @@ public class Task {
             font.draw(batch, runnableTimer.timeLeft + " left", x, y);
         } else if(thread.getState().equals(Thread.State.TIMED_WAITING)){
             font.draw(batch, runnableTimer.timeLeft + " left", x, y);
+        }
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        if (o instanceof TaskTimer) {
+            System.out.println("Task " + name + " is done!");
+
+            generateFood(body);
         }
     }
 }

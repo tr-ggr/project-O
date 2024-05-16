@@ -73,8 +73,7 @@ public class MyGdxGame extends Game {
 	public static GameController gameController = new GameController();
 	public static TextureAssetManager textureAssetManager;
 
-	private float timeSeconds = 0f;
-	private float generateNPC = 10f;
+
 
 
 	@Override
@@ -84,8 +83,6 @@ public class MyGdxGame extends Game {
 
 		textureAssetManager = new TextureAssetManager();
 		breadTexture = textureAssetManager.getTexture("Bread");
-
-
 
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false,w / SCALE, h / SCALE);
@@ -120,8 +117,6 @@ public class MyGdxGame extends Game {
 		font = new BitmapFont();
 
 
-
-
 	}
 
 	int textY = 500;
@@ -135,14 +130,7 @@ public class MyGdxGame extends Game {
 		destroyFood();
 
 		//Execute handleEvent each 1 second
-		timeSeconds +=Gdx.graphics.getRawDeltaTime();
-		if(timeSeconds > generateNPC){
-			timeSeconds-=generateNPC;
-			gameController.generateNPC();
-		}
-
-		gameController.updateTimer(Gdx.graphics.getDeltaTime());
-
+		gameController.update(Gdx.graphics.getDeltaTime());
 
 
 		Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -174,6 +162,9 @@ public class MyGdxGame extends Game {
 		}
 
 		font.draw(batch, "LIVES: " + gameController.lives, -200, 30);
+
+		font.draw(batch, String.format("TIME PASSED: %d", (int)gameController.timePassed), -200, 80);
+		font.draw(batch, "PHASE: " + gameController.phase, -200, 50);
 
 		font.draw(batch, "MONEY: " + gameController.moneyEarned, 400, 30);
 

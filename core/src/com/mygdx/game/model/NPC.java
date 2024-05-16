@@ -3,6 +3,7 @@ package com.mygdx.game.model;
 import com.badlogic.gdx.graphics.g2d.Batch;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 
 import static com.mygdx.game.MyGdxGame.font;
@@ -14,11 +15,11 @@ public class NPC {
     public float maxTime;
     public float currentTime;
 
-    public NPC(String id, float maxTime){
+    public NPC(String id, float maxTime, int n){
         this.id = id;
         this.maxTime = maxTime;
         this.currentTime = maxTime;
-        generateRequirements(1);
+        generateRequirements(n);
         System.out.println("NPC " + id + " has been created with requirements: " + requirements.toString());
     }
 
@@ -43,9 +44,13 @@ public class NPC {
     }
 
     public boolean checkRequirements(String food){
-        if(requirements.contains(food)){
-            System.out.println("NPC " + id + " has been satisfied");
-            return true;
+        for(Iterator<String> it = requirements.iterator(); it.hasNext();){
+            String req = it.next();
+            if(req.equals(food)){
+                it.remove();
+                System.out.println("NPC " + id + " has eaten " + food);
+                return true;
+            }
         }
         return false;
     }

@@ -53,7 +53,7 @@ public class Food {
         playerFixture.density = 1f;
 
         pBody = world.createBody(def);
-        pBody.createFixture(playerFixture).setUserData("Food");
+        pBody.createFixture(playerFixture).setUserData(name);
         shape.dispose();
 
         pBody.setActive(true);

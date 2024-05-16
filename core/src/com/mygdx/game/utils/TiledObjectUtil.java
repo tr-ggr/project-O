@@ -10,12 +10,41 @@ import com.mygdx.game.model.Task;
 
 import java.util.ArrayList;
 
+import static com.mygdx.game.MyGdxGame.taskController;
 import static com.mygdx.game.utils.Constants.PPM;
 
 public class TiledObjectUtil {
-    public static ArrayList<Task> tasks = new ArrayList<Task>();
 
     public static void parseTiledObjectLayer(World world, MapObjects objects) {
+        for (MapObject object : objects) {
+            Shape shape;
+
+            if (object instanceof PolylineMapObject) {
+                shape = createPolyline((PolylineMapObject) object);
+            } if (object instanceof RectangleMapObject) {
+                shape = createRectangle((RectangleMapObject) object);
+            }
+            else {
+                continue;
+            }
+
+            Body body;
+            BodyDef bdef = new BodyDef();
+            bdef.type = BodyDef.BodyType.StaticBody;
+            body = world.createBody(bdef);
+            body.createFixture(shape, 1f);
+
+
+
+
+
+
+
+            shape.dispose();
+        }
+    }
+
+    public static void parseTaskObjects(World world, MapObjects objects) {
         for (MapObject object : objects) {
             Shape shape;
 
@@ -42,10 +71,16 @@ public class TiledObjectUtil {
 //            body = world.createBody(bdef);
 //            body.createFixture(objectFixture).setUserData(object.getName());
 
+
             Object timeProperty = object.getProperties().get("Time");
             if (timeProperty != null) {
                 System.out.println(((RectangleMapObject) object).getRectangle());
-                tasks.add(new Task(object.getName(), Integer.parseInt(timeProperty.toString()), ((RectangleMapObject) object).getRectangle()));
+                if(object.getProperties().get("Key") == null)
+                    taskController.addTask(new Task(object.getName(), object.getProperties().get("Output").toString(), Integer.parseInt(timeProperty.toString()), ((RectangleMapObject) object).getRectangle()));
+                else{
+                    taskController.addTask(new Task(object.getName(), object.getProperties().get("Output").toString(), Integer.parseInt(timeProperty.toString()), ((RectangleMapObject) object).getRectangle(), object.getProperties().get("Key").toString()));
+                    System.out.println("Key: " + object.getProperties().get("Key").toString());
+                }
             } else {
                 System.out.println("Warning: Time property is missing for object " + object.getName());
             }

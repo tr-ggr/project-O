@@ -4,8 +4,10 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -18,11 +20,13 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.mygdx.game.model.Food;
-import com.mygdx.game.model.Player;
-import com.mygdx.game.model.Task;
+import com.mygdx.game.controller.FoodController;
+import com.mygdx.game.controller.GameController;
+import com.mygdx.game.controller.TaskController;
+import com.mygdx.game.model.*;
 import com.mygdx.game.utils.CollisionListener;
 import com.mygdx.game.utils.DropOff;
+import com.mygdx.game.utils.TextureAssetManager;
 import com.mygdx.game.utils.TiledObjectUtil;
 
 import java.util.ArrayList;
@@ -37,7 +41,6 @@ public class MyGdxGame extends Game {
 	private final float SCALE = 2.0f;
 
 	public static World world;
-	public static Player player;
 
 	private Box2DDebugRenderer b2dr;
 
@@ -49,17 +52,29 @@ public class MyGdxGame extends Game {
 	private OrthogonalTiledMapRenderer tmr;
 	private TiledMap map;
 
-	private WeldJointDef jointDef;
 	public static Joint grabFood;
 
 	private Food food, food2;
 
+	public static Player player;
+
 	public static ArrayList<Food> foods = new ArrayList<Food>();
 
 	private DropOff dropOff;
+	private JointDef jointDef;
+
+	public static BitmapFont font;
 
 	public static ArrayList<Body> toBeDeleted = new ArrayList<Body>();
 	public static boolean deleteJoint = false;
+
+	public static FoodController foodController = new FoodController();
+	public static TaskController taskController = new TaskController();
+	public static GameController gameController = new GameController();
+	public static TextureAssetManager textureAssetManager;
+
+	private float timeSeconds = 0f;
+	private float generateNPC = 10f;
 
 
 	@Override
@@ -67,7 +82,10 @@ public class MyGdxGame extends Game {
 		float w = Gdx.graphics.getWidth();
 		float h = Gdx.graphics.getHeight();
 
-		breadTexture = new Texture("bread.png");
+		textureAssetManager = new TextureAssetManager();
+		breadTexture = textureAssetManager.getTexture("Bread");
+
+
 
 		camera = new OrthographicCamera();
 		camera.setToOrtho(false,w / SCALE, h / SCALE);
@@ -76,7 +94,8 @@ public class MyGdxGame extends Game {
 		b2dr = new Box2DDebugRenderer();
 		world.setContactListener(new CollisionListener());
 
-		player = new Player(world);
+		player = new Player(world, 200, 200, false);
+
 		dropOff = new DropOff(world, 50, 75, 32, 32);
 
 		batch = new SpriteBatch();
@@ -84,9 +103,6 @@ public class MyGdxGame extends Game {
 
 		map = new TmxMapLoader().load("map.tmx");
 		tmr = new OrthogonalTiledMapRenderer(map);
-
-		food = new Food("Bread", breadTexture, 100, 100);
-		food2 = new Food("Spoon", breadTexture, 150, 170);
 
 
 //		Vector3 pos = camera.position;
@@ -96,19 +112,19 @@ public class MyGdxGame extends Game {
 
 		camera.update();
 
-		TiledObjectUtil.parseTiledObjectLayer(world, map.getLayers().get("Testing").getObjects());
+		TiledObjectUtil.parseTaskObjects(world, map.getLayers().get("Testing").getObjects());
+		TiledObjectUtil.parseTiledObjectLayer(world, map.getLayers().get("Border").getObjects());
 
 		jointDef = new WeldJointDef();
 
-		foods.add(food);
-		foods.add(food2);
-
-
+		font = new BitmapFont();
 
 
 
 
 	}
+
+	int textY = 500;
 
 	@Override
 	public void render () {
@@ -117,6 +133,17 @@ public class MyGdxGame extends Game {
 		removeJoints();
 		removeFood();
 		destroyFood();
+
+		//Execute handleEvent each 1 second
+		timeSeconds +=Gdx.graphics.getRawDeltaTime();
+		if(timeSeconds > generateNPC){
+			timeSeconds-=generateNPC;
+			gameController.generateNPC();
+		}
+
+		gameController.updateTimer(Gdx.graphics.getDeltaTime());
+
+
 
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(Gdx.gl.GL_COLOR_BUFFER_BIT);
@@ -133,15 +160,34 @@ public class MyGdxGame extends Game {
 		}
 
 		// Draw tasks
-		for(Task task : TiledObjectUtil.tasks){
+		for(Task task : taskController.getTasks()){
 			task.drawTask(batch);
 		}
+
+
+		font.draw(batch, "NPC:", -200, 500);
+		ArrayList<NPC> npcs = gameController.getNPCs();
+		for (int i = 0; i < npcs.size(); i++) {
+			NPC npc = npcs.get(i);
+			float textY = 500 - (i + 1) * 15; // Adjust the 15 to change the spacing between lines
+			npc.draw(batch, textY);
+		}
+
+		font.draw(batch, "LIVES: " + gameController.lives, -200, 30);
+
+		font.draw(batch, "MONEY: " + gameController.moneyEarned, 400, 30);
 
 		batch.end();
 
 		b2dr.render(world, camera.combined.scl(PPM));
 
+
 		if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)){
+			Gdx.app.exit();
+		}
+
+		if(gameController.lives == 0){
+			System.out.println("Game Over!");
 			Gdx.app.exit();
 		}
 
@@ -182,10 +228,22 @@ public class MyGdxGame extends Game {
 
 		Body bodyA = player.body, bodyB = player.interactedList.get(0);
 
+		player.interactedFood = bodyB;
+
 		// Set the anchor point to the center of the player's body
 		Vector2 worldCoordsAnchorPoint = bodyA.getWorldCenter();
 
-		bodyB.setTransform(bodyA.getPosition().x , bodyA.getPosition().y, 0);
+//		System.out.println(bodyA.getAngle());
+		if(player.facingDirection == FacingDirection.LEFT){
+			bodyB.setTransform(bodyA.getPosition().x - 0.3f , bodyA.getPosition().y, 0);
+		} else if(player.facingDirection == FacingDirection.RIGHT){
+			bodyB.setTransform(bodyA.getPosition().x + 0.3f , bodyA.getPosition().y, 0);
+		} else if(player.facingDirection == FacingDirection.UP){
+			bodyB.setTransform(bodyA.getPosition().x, bodyA.getPosition().y + 0.3f, 0);
+		} else if(player.facingDirection == FacingDirection.DOWN){
+			bodyB.setTransform(bodyA.getPosition().x, bodyA.getPosition().y - 0.3f, 0);
+		}
+
 
 		WeldJointDef weldJointDef = new WeldJointDef();
 		weldJointDef.bodyA = bodyA;
@@ -281,8 +339,8 @@ public class MyGdxGame extends Game {
 //		return pBody;
 //	}
 
-	public static void generateFood(Rectangle body){
-		foods.add(new Food("Food", breadTexture, (int) body.x, (int) ( body.y )));
+	public static void generateFood(Rectangle body, String foodType, Texture texture){
+		foods.add(new Food(foodType, texture, (int) body.x, (int) ( body.y )));
 	}
 
 	public static void removeFood(){
@@ -309,7 +367,6 @@ public class MyGdxGame extends Game {
 			Food food = it.next();
 			if(food.isDeleted){
 			System.out.println(food.name + " is submitted!");
-//				toBeDeleted.add(food.body);
 				it.remove();
 			}
 		}

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="11">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="15">
  <tileset firstgid="1" name="kitchen_v1" tilewidth="32" tileheight="32" tilecount="324" columns="18">
   <image source="kitchen_v1.png" width="576" height="576"/>
  </tileset>
@@ -23,35 +23,39 @@
 0,0,115,41,0,0,0,0,0,0,
 0,0,133,59,0,0,0,149,0,0,
 0,0,0,0,0,0,0,167,0,0,
-0,0,145,146,147,145,146,147,0,0,
 0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,255,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="6" name="Object Layer 2"/>
  <objectgroup id="5" name="Testing">
   <object id="2" name="fridge" x="62.6969" y="33.1925" width="28.2751" height="48.5594">
    <properties>
+    <property name="Output" value="Bread"/>
     <property name="Time" value="3"/>
    </properties>
   </object>
   <object id="3" name="upper_stove" x="96.504" y="44.8713" width="31.9631" height="34.4218">
    <properties>
+    <property name="Output" value="Bread"/>
     <property name="Time" value="10"/>
    </properties>
   </object>
-  <object id="4" x="63.9262" y="143.219" width="191.164" height="15.9816"/>
   <object id="5" name="stove" x="238.494" y="93.4307" width="17.2109" height="34.4218">
    <properties>
+    <property name="Key" value="Bread"/>
+    <property name="Output" value="Spoon"/>
     <property name="Time" value="5"/>
    </properties>
   </object>
-  <object id="7" x="2.4587" y="-12.9082" width="323.319" height="16.5962"/>
-  <object id="8" x="319" y="8" width="24" height="308"/>
-  <object id="9" x="-4" y="312" width="331" height="41"/>
-  <object id="10" x="-20" y="-11" width="19" height="332"/>
+ </objectgroup>
+ <objectgroup id="7" name="Border">
+  <object id="11" x="0.9587" y="-19.9541" width="323.319" height="16.5962"/>
+  <object id="12" x="317.5" y="0.9541" width="24" height="308"/>
+  <object id="13" x="-5.5" y="304.954" width="331" height="41"/>
+  <object id="14" x="-21.5" y="-18.0459" width="19" height="332"/>
  </objectgroup>
 </map>

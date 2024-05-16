@@ -25,9 +25,6 @@ public class DropOff {
         playerFixture.density = 1.0f;
         playerFixture.isSensor = true;
 
-
-
-
         this.body = world.createBody(def);
         this.body.createFixture(playerFixture).setUserData("Sensor");
     }

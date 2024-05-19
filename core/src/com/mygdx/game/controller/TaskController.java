@@ -1,5 +1,6 @@
 package com.mygdx.game.controller;
 
+import com.mygdx.game.actor.TaskCard;
 import com.mygdx.game.model.Task;
 
 import java.util.ArrayList;
@@ -7,11 +8,13 @@ import java.util.ArrayList;
 public class TaskController {
     private final ArrayList<Task> tasks = new ArrayList<Task>();
 
+
     public TaskController(){
     }
 
     public void addTask(Task task){
         tasks.add(task);
+
     }
 
     public boolean isTask(String taskName){

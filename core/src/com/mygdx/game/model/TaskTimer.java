@@ -1,24 +1,27 @@
 // TaskTimer.java
 package com.mygdx.game.model;
 
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.BodyDef;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 
-import java.util.Observable;
-
-import static com.mygdx.game.MyGdxGame.world;
-import static com.mygdx.game.utils.Constants.PPM;
-
-public class TaskTimer extends Observable implements Runnable{
+public class TaskTimer implements Runnable{
     private final int time;
     public boolean isPaused = false;
     public int timeLeft;
+    private PropertyChangeSupport support;
 
     public TaskTimer(int time){
         this.time = time;
+        this.support = new PropertyChangeSupport(this);
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener pcl) {
+        support.addPropertyChangeListener(pcl);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener pcl) {
+        support.removePropertyChangeListener(pcl);
     }
 
     @Override
@@ -45,8 +48,7 @@ public class TaskTimer extends Observable implements Runnable{
         }
 //        System.out.println("Task completed!");
         // Notify observers that the task is completed
-        setChanged();
-        notifyObservers();
+        support.firePropertyChange("completed", null, this);
     }
 
 

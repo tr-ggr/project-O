@@ -5,15 +5,12 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
-import com.mygdx.game.utils.TiledObjectUtil;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.mygdx.game.MyGdxGame.*;
-import static com.mygdx.game.utils.TiledObjectUtil.*;
+import static com.mygdx.game.screens.GameplayScreen.*;
 import static com.mygdx.game.utils.Constants.PPM;
 
 public class Player{
@@ -35,7 +32,7 @@ public class Player{
 
     public Player(World world, int x, int y, boolean isPlayer2){
         createPlayerBody(world, x, y, 32, 32);
-        sprite = new Sprite(new Texture("download-compresskaru.com.png"));
+        sprite = new Sprite(new Texture("serato_down.png"));
 
         if(isPlayer2){
             moveUp = Input.Keys.LEFT;
@@ -180,6 +177,7 @@ public class Player{
     public void draw(Batch batch){
         sprite.setPosition(body.getPosition().x * PPM - sprite.getWidth() / 2, body.getPosition().y * PPM - sprite.getHeight() / 2);
         sprite.draw(batch);
+//        batch.draw(sprite, body.getPosition().x * PPM - sprite.getWidth() / 2, body.getPosition().y * PPM - sprite.getHeight() / 2, 64, 64);
     }
 }
 

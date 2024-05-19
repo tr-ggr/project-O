@@ -8,7 +8,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 
-import static com.mygdx.game.MyGdxGame.world;
+import static com.mygdx.game.screens.GameplayScreen.world;
 import static com.mygdx.game.utils.Constants.PPM;
 
 public class Food {
@@ -21,6 +21,7 @@ public class Food {
         this.name = name;
         this.sprite = new Sprite(sprite);
         this.body = createBox(x, y, 16, 16, false);
+        System.out.println("Generated new Food!");
     }
 
     public void draw(Batch batch){

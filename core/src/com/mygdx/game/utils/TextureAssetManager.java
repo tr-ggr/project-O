@@ -13,6 +13,7 @@ public class TextureAssetManager {
         textures.put("player", new Texture("download-compresskaru.com.png"));
         textures.put("Bread", new Texture("bread.png"));
         textures.put("Spoon", new Texture("spoon.png"));
+        textures.put("Coffee", new Texture("coffee.png"));
     }
 
     public Texture getTexture(String key){

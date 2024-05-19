@@ -1,9 +1,10 @@
-package com.mygdx.game.screens;
+package com.mygdx.game.old;
 
-
+import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -13,17 +14,8 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.mygdx.game.Application;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.utils.viewport.FillViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.controller.FoodController;
 import com.mygdx.game.controller.GameController;
 import com.mygdx.game.controller.TaskController;
@@ -35,17 +27,10 @@ import com.mygdx.game.utils.TiledObjectUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.ListIterator;
 
 import static com.mygdx.game.utils.Constants.PPM;
 
-
-public class GameplayScreen implements Screen {
-    private final Application app;
-
-    private Image hudImage;
-
-    //GAME STUFF
+public class backup_mygdxgame extends Game {
     private boolean DEBUG = false;
     private final float SCALE = 2.0f;
 
@@ -79,22 +64,14 @@ public class GameplayScreen implements Screen {
 
     public static FoodController foodController = new FoodController();
     public static TaskController taskController = new TaskController();
-    public static GameController gameController;
+//    public static GameController gameController = new GameController();
     public static TextureAssetManager textureAssetManager;
 
-    public GameplayScreen(final Application app) {
-        this.app = app;
-
-
-        gameController = new GameController(app);
-
-//        Texture hudTexture = new Texture(Gdx.files.internal("overtimeHUD.png"));
 
 
 
-//        Gdx.input.setInputProcessor(stageHUD);
-
-        //GAME STUFF
+    @Override
+    public void create() {
         float w = Gdx.graphics.getWidth();
         float h = Gdx.graphics.getHeight();
 
@@ -133,110 +110,87 @@ public class GameplayScreen implements Screen {
         jointDef = new WeldJointDef();
 
         font = new BitmapFont();
-    }
 
-    @Override
-    public void show() {
 
     }
 
+
     @Override
-    public void render(float v) {
-
-
-        // Clear the screen
-        Gdx.gl.glClearColor(.25f, .25f, .25f, 1f);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        // Render the game world
-        tmr.render();
-
-        // Render the player and foods
-        batch.begin();
-        player.draw(batch);
-        for (Food food : foods) {
-            food.draw(batch);
-        }
-        batch.end();
-
-        // Render the tasks
-        batch.begin();
-        for (Task task : taskController.getTasks()) {
-            task.drawTask(batch);
-        }
-        batch.end();
-
-        // Render the HUD
-//        hudBatch.begin();
-//        font.draw(hudBatch, "NPC:", 0, 500);
-//        ArrayList<NPC> npcs = gameController.getNPCs();
-//        for (int i = 0; i < npcs.size(); i++) {
-//            NPC npc = npcs.get(i);
-//            float textY = 500 - (i + 1) * 15; // Adjust the 15 to change the spacing between lines
-//            npc.draw(hudBatch, textY);
-//        }
-//        hudBatch.end();
-
-        gameController.stageHUD.draw();
-
-        // Render the game stats
-        app.batch.begin();
-        app.font.draw(app.batch, gameController.moneyEarned + "", 80 , 60);
-        app.font.draw(app.batch, (int)gameController.timePassed + "", 500 , 60);
-        app.batch.end();
-
-        b2dr.render(world, camera.combined.scl(PPM));
-
-        //Execute handleEvent each 1 second
-        gameController.update(Gdx.graphics.getDeltaTime());
-
+    public void render () {
         update(Gdx.graphics.getDeltaTime());
         grabFood();
         removeJoints();
         removeFood();
         destroyFood();
 
+        //Execute handleEvent each 1 second
+//        gameController.update(Gdx.graphics.getDeltaTime());
 
+
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(Gdx.gl.GL_COLOR_BUFFER_BIT);
+
+
+
+        tmr.render();
+
+        batch.begin();
+
+        player.draw(batch);
+        for(Food food : foods){
+            food.draw(batch);
+        }
+
+        // Draw tasks
+        for(Task task : taskController.getTasks()){
+            task.drawTask(batch);
+        }
+
+
+
+
+        batch.end();
+
+        hudBatch.begin();
+
+        font.draw(hudBatch, "NPC:", 0, 500);
+//        ArrayList<NPC> npcs = gameController.getNPCs();
+//        for (int i = 0; i < npcs.size(); i++) {
+//            NPC npc = npcs.get(i);
+//            float textY = 500 - (i + 1) * 15; // Adjust the 15 to change the spacing between lines
+//            npc.draw(hudBatch, textY);
+//        }
+
+//        font.draw(hudBatch, "LIVES: " + gameController.lives, 0, 30);
+//
+//        font.draw(hudBatch, String.format("TIME PASSED: %d", (int)gameController.timePassed), 0, 80);
+//        font.draw(hudBatch, "PHASE: " + gameController.phase, 0, 50);
+//
+//        font.draw(hudBatch, "MONEY: " + gameController.moneyEarned, 0, 30);
+        hudBatch.end();
+
+        b2dr.render(world, camera.combined.scl(PPM));
 
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)){
             Gdx.app.exit();
         }
 
-        if(gameController.lives == 0){
-            System.out.println("Game Over!");
-            Gdx.app.exit();
-        }
+//        if(gameController.lives == 0){
+//            System.out.println("Game Over!");
+//            Gdx.app.exit();
+//        }
 
-//        super.render();
-    }
-
-
-
-    @Override
-    public void resize(int i, int i1) {
-        gameController.stageHUD.getViewport().update(i, i1, true);
-
-        camera.setToOrtho(false, i / 2, i1 / 2);
+        super.render();
     }
 
     @Override
-    public void pause() {
-
+    public void resize(int width, int height) {
+        camera.setToOrtho(false, width / 2, height / 2);
     }
 
     @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
-    }
-
-    @Override
-    public void dispose() {
+    public void dispose () {
         world.dispose();
         b2dr.dispose();
         batch.dispose();
@@ -295,13 +249,11 @@ public class GameplayScreen implements Screen {
 
     public void update(float delta) {
         world.step(1/60f, 6, 2);
-        gameController.stageHUD.act(delta);
         player.inputUpdate(delta);
         cameraUpdate(delta);
 //		camera.update();
         tmr.setView(camera);
         batch.setProjectionMatrix(camera.combined);
-
     }
 
     public void cameraUpdate(float delta) {
@@ -322,7 +274,7 @@ public class GameplayScreen implements Screen {
 //		float mapHeightInPixels = mapHeightInTiles * tileSize;
 //
 //		camera.position.set(mapWidthInPixels / 2, mapHeightInPixels / 2, 0);
-		camera.zoom = 1f;
+//		camera.zoom = 1.3f;
 
         camera.update();
     }
@@ -331,7 +283,7 @@ public class GameplayScreen implements Screen {
         Body pBody;
 
         BodyDef def = new BodyDef();
-        def.type = (isStatic) ? BodyDef.BodyType.StaticBody : BodyDef.BodyType.DynamicBody;
+        def.type = (isStatic) ? BodyType.StaticBody : BodyType.DynamicBody;
         def.position.set(x / PPM, y / PPM);
         def.fixedRotation = false;
 
@@ -402,7 +354,7 @@ public class GameplayScreen implements Screen {
     }
 
     public static void destroyFood(){
-        for(ListIterator<Food> it = foods.listIterator(); it.hasNext();){
+        for(Iterator<Food> it = foods.iterator() ; it.hasNext();){
             Food food = it.next();
             if(food.isDeleted){
                 System.out.println(food.name + " is submitted!");

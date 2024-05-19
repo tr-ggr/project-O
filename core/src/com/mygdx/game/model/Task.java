@@ -1,26 +1,16 @@
 // Task.java
 package com.mygdx.game.model;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.utils.Timer;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
-import java.util.Observable;
-import java.util.Observer;
-
-
-
-import static com.mygdx.game.MyGdxGame.*;
-import static com.mygdx.game.utils.Constants.PPM;
+import static com.mygdx.game.screens.GameplayScreen.*;
 import static java.lang.Thread.sleep;
 
-public class Task implements Observer {
+public class Task implements PropertyChangeListener {
     public String name;
     public TaskTimer runnableTimer;
     public Thread thread;
@@ -36,10 +26,10 @@ public class Task implements Observer {
         this.runnableTimer = new TaskTimer(time);
         this.thread = new Thread(runnableTimer);
         this.body = body;
-        this.runnableTimer.addObserver(this);
         this.key = null;
         this.isEnabled = true;
         this.foodName = foodName;
+        this.runnableTimer.addPropertyChangeListener(this);
     }
 
     public Task(String name, String foodName, int time, Rectangle body, String key){
@@ -50,7 +40,7 @@ public class Task implements Observer {
         this.key = key;
         this.isEnabled = false;
         this.foodName = foodName;
-        this.runnableTimer.addObserver(this);
+        this.runnableTimer.addPropertyChangeListener(this);
     }
 
     public void interactTimer(){
@@ -103,11 +93,13 @@ public class Task implements Observer {
         }
     }
 
+
     @Override
-    public void update(Observable o, Object arg) {
-        if (o instanceof TaskTimer) {
+    public void propertyChange(PropertyChangeEvent evt) {
+        if ("completed".equals(evt.getPropertyName())) {
             System.out.println("Task " + name + " is done!");
             generateFood(body, foodName, textureAssetManager.getTexture(foodName));
+            System.out.println("Successfully generated food!");
             if(key != null) isEnabled = false;
         }
     }

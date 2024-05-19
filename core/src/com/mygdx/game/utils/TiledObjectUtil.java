@@ -8,9 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.model.Task;
 
-import java.util.ArrayList;
-
-import static com.mygdx.game.MyGdxGame.taskController;
+import static com.mygdx.game.screens.GameplayScreen.taskController;
 import static com.mygdx.game.utils.Constants.PPM;
 
 public class TiledObjectUtil {

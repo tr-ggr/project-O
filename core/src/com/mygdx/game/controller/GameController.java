@@ -1,6 +1,22 @@
 package com.mygdx.game.controller;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Cell;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.mygdx.game.Application;
+import com.mygdx.game.actor.CherryUI;
+import com.mygdx.game.actor.LifeUI;
+import com.mygdx.game.actor.TaskCard;
 import com.mygdx.game.model.NPC;
+import dev.lyze.flexbox.FlexBox;
+import io.github.orioncraftmc.meditate.YogaNode;
+import io.github.orioncraftmc.meditate.enums.YogaEdge;
+import io.github.orioncraftmc.meditate.enums.YogaFlexDirection;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -8,8 +24,12 @@ import java.util.Random;
 
 
 public class GameController {
+    public Stage stageHUD;
+    private Image hudImage;
+
     ArrayList<NPC> npcs = new ArrayList<>();
-    
+    private final ArrayList<TaskCard> npcCards = new ArrayList<TaskCard>();
+
     public int lives;
     public int moneyEarned;
 
@@ -24,34 +44,104 @@ public class GameController {
 
     public boolean firstSpawn = true;
 
+    private boolean hasCherry = false;
+
+    private NPC Cherry = null;
+
     public enum PHASE {
         PHASE1, PHASE2, PHASE3;
     }
 
-    public GameController(){
+    private Table flexBox;
+
+    private CherryUI cherryUI;
+
+    private LifeUI lifeUI;
+
+    public GameController(final Application app){
         lives = 3;
         moneyEarned = 0;
+        this.stageHUD = new Stage(new FitViewport(Application.V_WIDTH, Application.V_HEIGHT , app.camera));
+
+        cherryUI = new CherryUI();
+        cherryUI.setVisible(false);
+        stageHUD.addActor(cherryUI);
+
+        Texture hudTexture = new Texture(Gdx.files.internal("overtimeHUD.png"));
+        hudImage = new Image(hudTexture);
+        stageHUD.addActor(hudImage);
+
+
+        Table root = new Table();
+        root.setFillParent(true);
+        stageHUD.addActor(root);
+
+        flexBox = new Table();
+
+        root.add(flexBox).top().expand().left().padLeft(50);
+
+        lifeUI = new LifeUI(lives, stageHUD);
+
+//        stageHUD.setDebugAll(true);
+
+
+
     }
 
     public void generateNPC(){
+        NPC curr = null;
+        TaskCard card = null;
+
+//        if(!hasCherry){
+//            curr = new NPC("Cherry", 40, 3);
+//            System.out.println("Generated Ma'am Dean NPC!");
+//            hasCherry = true;
+//            npcs.add(curr);
+//            cherryUI.setCherry(curr);
+//            cherryUI.setVisible(true);
+//
+//            return;
+//        }
+
+
+
+//        npcs.add(new NPC("Cherry", 40, 3));
         if(phase == PHASE.PHASE3){
-            if(random.nextInt(2) == 1 && !npcs.contains(new NPC("Cherry", 40, 3))) {
+            if(random.nextInt(2) == 1 && !hasCherry) {
+                Cherry = new NPC("Cherry", 40, 3);
                 System.out.println("Generated Ma'am Dean NPC!");
-                npcs.add(new NPC("Cherry", 40, 3));
+                hasCherry = true;
+                cherryUI.setCherry(Cherry);
+                cherryUI.setVisible(true);
             } else {
                 System.out.println("Generated a normal NPC!");
-                npcs.add(new NPC(npcs.size() + 1 + "", 25, 1));
+                curr = new NPC(npcs.size() + 1 + "", 25, 1);
+                card = new TaskCard(curr.getRequirements().get(0), curr.maxTime);
+                npcs.add(curr);
+                npcCards.add(card);
+                flexBox.add(card).space(10);
             }
         } else if (phase == PHASE.PHASE1){
-            System.out.println("Generated an NPC!");
-            npcs.add(new NPC(npcs.size() + 1 + "", 25, 1));
+            System.out.println("Generated a normal NPC!");
+            curr = new NPC(npcs.size() + 1 + "", 25, 1);
+            card = new TaskCard(curr.getRequirements().get(0), curr.maxTime);
+            npcs.add(curr);
+            npcCards.add(card);
+            flexBox.add(card).space(10);
         } else {
-            if(random.nextInt(2) == 1 && !npcs.contains(new NPC("Cherry", 40, 2))) {
+            if(random.nextInt(2) == 1 && !hasCherry) {
+                Cherry = new NPC("Cherry", 40, 3);
                 System.out.println("Generated Ma'am Dean NPC!");
-                npcs.add(new NPC("Cherry", 40, 3));
+                hasCherry = true;
+                cherryUI.setCherry(Cherry);
+                cherryUI.setVisible(true);
             } else {
                 System.out.println("Generated a normal NPC!");
-                npcs.add(new NPC(npcs.size() + 1 + "", 25, 1));
+                curr = new NPC(npcs.size() + 1 + "", 25, 1);
+                card = new TaskCard(curr.getRequirements().get(0), curr.maxTime);
+                npcs.add(curr);
+                npcCards.add(card);
+                flexBox.add(card).space(10);
             }
         }
     }
@@ -73,8 +163,22 @@ public class GameController {
             generateNPC();
             timeSeconds = 0f;
         }
+
+        updateHUD(delta);
         checkPhase();
         updateTimer(delta);
+        cherryUI.update();
+        lifeUI.update(lives);
+    }
+
+    public void updateHUD(float delta){
+        for(Iterator<TaskCard> it = npcCards.iterator() ; it.hasNext();){
+            TaskCard card = it.next();
+            card.updateProgress(delta);
+            if(card.progressBar.getValue() <= 0){
+                it.remove();
+            }
+        }
     }
 
     private void checkPhase(){
@@ -92,12 +196,19 @@ public class GameController {
     }
 
     public void updateTimer(float delta){
-        for(Iterator<NPC> it = npcs.iterator() ; it.hasNext();){
+        for(Iterator<NPC> it = npcs.listIterator(); it.hasNext();){
             NPC npc = it.next();
             if(npc.updateTimer(delta)){
-                lives--;
+                removeActor(flexBox, npcs.indexOf(npc));
                 it.remove();
+                lives--;
             };
+        }
+
+        if(hasCherry && Cherry.updateTimer(delta)){
+            hasCherry = false;
+            cherryUI.setVisible(false);
+            lives--;
         }
     }
 
@@ -115,17 +226,37 @@ public class GameController {
                 break;
         }
 
+        if(hasCherry && Cherry.checkRequirements(food)){
+            moneyEarned += (Math.round(5 / (Cherry.currentTime / Cherry.maxTime) ) * phaseMultiplier);
+            if(Cherry.getRequirements().isEmpty()){
+                hasCherry = false;
+                cherryUI.setVisible(false);
+            }
+            return true;
+        }
+
         for(Iterator<NPC> it = npcs.iterator() ; it.hasNext();){
             NPC npc = it.next();
             if(npc.checkRequirements(food)){
-                moneyEarned += (Math.round(npc.currentTime / npc.maxTime) * phaseMultiplier);
-                if(npc.getRequirements().isEmpty()){
+                moneyEarned += (Math.round(5 / (npc.currentTime / npc.maxTime) ) * phaseMultiplier);
+                if(npc.getRequirements().isEmpty() && !npc.id.equals("Cherry")){
+                    removeActor(flexBox, npcs.indexOf(npc));
                     it.remove();
                 }
                 return true;
             }
         }
+
         return  false;
+    }
+
+    public void renderHUD(){
+        stageHUD.draw();
+    }
+
+    public void removeActor(Table container, int position) {
+        container.removeActorAt(position, false);
+        container.pack();
     }
 
 

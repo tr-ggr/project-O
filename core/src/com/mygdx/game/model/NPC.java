@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
-import static com.mygdx.game.MyGdxGame.font;
-import static com.mygdx.game.MyGdxGame.foodController;
+import static com.mygdx.game.screens.GameplayScreen.font;
+import static com.mygdx.game.screens.GameplayScreen.foodController;
 
 public class NPC {
     public String id;

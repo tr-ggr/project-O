@@ -1,17 +1,11 @@
 package com.mygdx.game.utils;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.physics.box2d.*;
-import com.mygdx.game.controller.TaskController;
-import com.mygdx.game.model.Food;
-import com.mygdx.game.model.Player;
 import com.mygdx.game.model.Task;
 
 import java.util.Objects;
 
-import static com.mygdx.game.MyGdxGame.*;
-import static com.mygdx.game.utils.TiledObjectUtil.*;
+import static com.mygdx.game.screens.GameplayScreen.*;
 
 public class CollisionListener implements ContactListener {
 

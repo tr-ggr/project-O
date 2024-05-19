@@ -245,7 +245,7 @@ public class GameController {
             NPC npc = it.next();
             if(npc.checkRequirements(food)){
                 moneyEarned += (Math.round( 5 * (npc.currentTime / npc.maxTime) ) * phaseMultiplier);
-                if(npc.getRequirements().isEmpty() && !npc.id.equals("Cherry")){
+                if(npc.getRequirements().isEmpty()){
                     removeActor(flexBox, npcs.indexOf(npc));
                     it.remove();
                 }
@@ -261,12 +261,6 @@ public class GameController {
     }
 
     public void removeActor(Table container, int position) {
-
-//        container.removeActorAt(position, false);
-//        container.pack();
-//        System.out.println("Removing actor at position " + position);
-//        System.out.println(npcCards);
-
         container.clearChildren();
         npcCards.remove(position);
 

@@ -36,6 +36,8 @@ import com.mygdx.game.utils.TiledObjectUtil;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ListIterator;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.mygdx.game.utils.Constants.PPM;
 
@@ -67,7 +69,8 @@ public class GameplayScreen implements Screen {
 
     public static Player player;
 
-    public static ArrayList<Food> foods = new ArrayList<Food>();
+    public static ConcurrentLinkedQueue<Food> foods = new ConcurrentLinkedQueue<Food>();
+    public static ArrayList<Food> foodsToBeAdded = new ArrayList<Food>();
 
     private DropOff dropOff;
     private JointDef jointDef;
@@ -143,8 +146,6 @@ public class GameplayScreen implements Screen {
 
     @Override
     public void render(float v) {
-
-
         // Clear the screen
         Gdx.gl.glClearColor(.25f, .25f, .25f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -167,18 +168,7 @@ public class GameplayScreen implements Screen {
         }
         batch.end();
 
-        // Render the HUD
-//        hudBatch.begin();
-//        font.draw(hudBatch, "NPC:", 0, 500);
-//        ArrayList<NPC> npcs = gameController.getNPCs();
-//        for (int i = 0; i < npcs.size(); i++) {
-//            NPC npc = npcs.get(i);
-//            float textY = 500 - (i + 1) * 15; // Adjust the 15 to change the spacing between lines
-//            npc.draw(hudBatch, textY);
-//        }
-//        hudBatch.end();
-
-        gameController.stageHUD.draw();
+        gameController.renderHUD();
 
         // Render the game stats
         app.batch.begin();
@@ -191,14 +181,14 @@ public class GameplayScreen implements Screen {
         //Execute handleEvent each 1 second
         gameController.update(Gdx.graphics.getDeltaTime());
 
+        renderFood();
         update(Gdx.graphics.getDeltaTime());
+
+        renderFood();
         grabFood();
         removeJoints();
         removeFood();
         destroyFood();
-
-
-
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)){
             Gdx.app.exit();
@@ -206,6 +196,7 @@ public class GameplayScreen implements Screen {
 
         if(gameController.lives == 0){
             System.out.println("Game Over!");
+            System.out.println("Money earned: " + gameController.moneyEarned);
             Gdx.app.exit();
         }
 
@@ -379,7 +370,14 @@ public class GameplayScreen implements Screen {
 //	}
 
     public static void generateFood(Rectangle body, String foodType, Texture texture){
-        foods.add(new Food(foodType, texture, (int) body.x, (int) body.y));
+        foodsToBeAdded.add(new Food(foodType, texture, (int) body.x, (int) body.y));
+    }
+
+    public static void renderFood(){
+        for(Food food: foodsToBeAdded){
+            foods.add(food);
+        }
+        foodsToBeAdded.clear();
     }
 
     public static void removeFood(){
@@ -389,7 +387,7 @@ public class GameplayScreen implements Screen {
             Body body = iterator.next();
             world.destroyBody(body);
             body.setActive(false);
-            body = null;
+//            body = null;
             iterator.remove();
         }
     }
@@ -403,7 +401,7 @@ public class GameplayScreen implements Screen {
     }
 
     public static void destroyFood(){
-        for(ListIterator<Food> it = foods.listIterator(); it.hasNext();){
+        for(Iterator<Food> it = foods.iterator(); it.hasNext();){
             Food food = it.next();
             if(food.isDeleted){
                 System.out.println(food.name + " is submitted!");

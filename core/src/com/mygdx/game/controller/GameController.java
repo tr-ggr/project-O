@@ -172,12 +172,8 @@ public class GameController {
     }
 
     public void updateHUD(float delta){
-        for(Iterator<TaskCard> it = npcCards.iterator() ; it.hasNext();){
-            TaskCard card = it.next();
+        for (TaskCard card : npcCards) {
             card.updateProgress(delta);
-            if(card.progressBar.getValue() <= 0){
-                it.remove();
-            }
         }
     }
 
@@ -255,8 +251,18 @@ public class GameController {
     }
 
     public void removeActor(Table container, int position) {
-        container.removeActorAt(position, false);
-        container.pack();
+
+//        container.removeActorAt(position, false);
+//        container.pack();
+//        System.out.println("Removing actor at position " + position);
+//        System.out.println(npcCards);
+
+        container.clearChildren();
+        npcCards.remove(position);
+
+        for (TaskCard npcCard : npcCards) {
+            container.add(npcCard).space(10);
+        }
     }
 
 

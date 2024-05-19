@@ -14,16 +14,11 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.mygdx.game.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.utils.viewport.FillViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.mygdx.game.controller.FoodController;
 import com.mygdx.game.controller.GameController;
 import com.mygdx.game.controller.TaskController;
@@ -35,9 +30,7 @@ import com.mygdx.game.utils.TiledObjectUtil;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.ListIterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.mygdx.game.utils.Constants.PPM;
 
@@ -137,6 +130,8 @@ public class GameplayScreen implements Screen {
         jointDef = new WeldJointDef();
 
         font = new BitmapFont();
+
+
     }
 
     @Override
@@ -156,6 +151,7 @@ public class GameplayScreen implements Screen {
         // Render the player and foods
         batch.begin();
         player.draw(batch);
+
         for (Food food : foods) {
             food.draw(batch);
         }
@@ -182,6 +178,7 @@ public class GameplayScreen implements Screen {
         gameController.update(Gdx.graphics.getDeltaTime());
 
         renderFood();
+
         update(Gdx.graphics.getDeltaTime());
 
         renderFood();

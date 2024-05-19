@@ -4,6 +4,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.mygdx.game.controller.GameController;
 import com.mygdx.game.screens.GameplayScreen;
 import com.mygdx.game.screens.LoginScreen;
 import com.mygdx.game.screens.TestingScreen;
@@ -26,7 +27,7 @@ public class Application extends Game {
         font = new BitmapFont();
         font.getData().setScale(2f);
 
-        this.setScreen(new LoginScreen(this));
+        this.setScreen(new GameplayScreen(this));
     }
 
     @Override

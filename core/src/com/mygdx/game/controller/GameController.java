@@ -92,6 +92,8 @@ public class GameController {
 
 
 
+
+
     }
 
     public void generateNPC(){

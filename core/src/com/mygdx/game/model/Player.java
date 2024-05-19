@@ -41,26 +41,26 @@ public class Player{
     float stateTime;
 
 
-    public Player(World world, int x, int y, boolean isPlayer2){
+    public Player(World world, int x, int y, boolean isPlayer1){
         createPlayerBody(world, x, y, 32, 32);
         sprite = new Sprite(new Texture("serato_down.png"));
 
-        if(isPlayer2){
-            moveUp = Input.Keys.LEFT;
-            moveDown = Input.Keys.LEFT;
-            moveRight = Input.Keys.LEFT;
+        if(isPlayer1){
+            moveUp = Input.Keys.UP;
+            moveDown = Input.Keys.DOWN;
+            moveRight = Input.Keys.RIGHT;
             moveLeft = Input.Keys.LEFT;
 
-            interact = Input.Keys.L;
-            grab = Input.Keys.K;
+            interact = Input.Keys.K;
+            grab = Input.Keys.L;
         } else {
             moveUp = Input.Keys.W;
             moveDown = Input.Keys.S;
             moveRight = Input.Keys.D;
             moveLeft = Input.Keys.A;
 
-            interact = Input.Keys.C;
-            grab = Input.Keys.V;
+            interact = Input.Keys.O;
+            grab = Input.Keys.P;
         }
 
         createPlayerAnimations();

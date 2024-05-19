@@ -1,6 +1,7 @@
 // Task.java
 package com.mygdx.game.model;
 
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 
@@ -21,6 +22,8 @@ public class Task implements PropertyChangeListener {
     public boolean isEnabled;
     public String foodName;
 
+    public Sprite sprite;
+
     public Task(String name, String foodName, int time, Rectangle body){
         this.name = name;
         this.runnableTimer = new TaskTimer(time);
@@ -30,6 +33,7 @@ public class Task implements PropertyChangeListener {
         this.isEnabled = true;
         this.foodName = foodName;
         this.runnableTimer.addPropertyChangeListener(this);
+
     }
 
     public Task(String name, String foodName, int time, Rectangle body, String key){
@@ -41,6 +45,8 @@ public class Task implements PropertyChangeListener {
         this.isEnabled = false;
         this.foodName = foodName;
         this.runnableTimer.addPropertyChangeListener(this);
+        this.sprite = new Sprite(textureAssetManager.getTexture(key));
+        sprite.setPosition(body.x, body.y + 20);
     }
 
     public void interactTimer(){
@@ -78,6 +84,8 @@ public class Task implements PropertyChangeListener {
         float x = this.body.x + this.body.width / 2 - 20;
         float y = this.body.y  + this.body.height + 20;
 //        System.out.println("Drawing task + " + this.body.getPosition().x);
+
+        if(isEnabled && key != null) sprite.draw(batch);
 
         if(thread.getState().equals(Thread.State.TERMINATED)) {
             font.draw(batch, "Task completed!", x, y);

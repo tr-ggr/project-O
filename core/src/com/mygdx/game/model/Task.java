@@ -99,7 +99,7 @@ public class Task implements PropertyChangeListener {
         if ("completed".equals(evt.getPropertyName())) {
             System.out.println("Task " + name + " is done!");
             generateFood(body, foodName, textureAssetManager.getTexture(foodName));
-            System.out.println("Successfully generated food!");
+//            System.out.println("Successfully generated food!");
             if(key != null) isEnabled = false;
         }
     }

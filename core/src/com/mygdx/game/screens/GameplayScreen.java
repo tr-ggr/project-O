@@ -88,6 +88,7 @@ public class GameplayScreen implements Screen {
 
         gameController = new GameController(app);
 
+
 //        Texture hudTexture = new Texture(Gdx.files.internal("overtimeHUD.png"));
 
 
@@ -378,7 +379,7 @@ public class GameplayScreen implements Screen {
 //	}
 
     public static void generateFood(Rectangle body, String foodType, Texture texture){
-        foods.add(new Food(foodType, texture, (int) body.x, (int) ( body.y )));
+        foods.add(new Food(foodType, texture, (int) body.x, (int) body.y));
     }
 
     public static void removeFood(){

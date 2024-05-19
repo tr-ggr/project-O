@@ -3,8 +3,10 @@ package com.mygdx.game.model;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.physics.box2d.*;
 
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ public class Player{
     public boolean isGrabbing = false;
     public Sprite sprite;
     public FacingDirection facingDirection = FacingDirection.RIGHT;
+    public boolean isMoving = false;
     public ArrayList<Body> interactedList = new ArrayList<>();
 
     public int moveUp;
@@ -29,6 +32,14 @@ public class Player{
 
     public int interact;
     public int grab;
+
+    // The walk animations for each direction
+    private Animation[] walkAnimations; // Must declare frame type (TextureRegion)
+
+    Texture walkSheet;
+    // A variable for tracking elapsed time for the animation
+    float stateTime;
+
 
     public Player(World world, int x, int y, boolean isPlayer2){
         createPlayerBody(world, x, y, 32, 32);
@@ -51,35 +62,77 @@ public class Player{
             interact = Input.Keys.C;
             grab = Input.Keys.V;
         }
+
+        createPlayerAnimations();
+    }
+
+    public void createPlayerAnimations() {
+        int FRAME_COLS = 16; // Total number of frames in your sprite sheet
+        int FRAME_ROWS = 1; // Only one row in the sprite sheet
+
+        // Define the start and end columns for each direction
+        int[] startCols = {0, 4, 8, 12}; // Replace with your start columns for each direction
+        int[] endCols = {3, 7, 11, 15}; // Replace with your end columns for each direction
+
+        walkSheet = new Texture(Gdx.files.internal("sheets/serato_spritesheet.png"));
+        TextureRegion[][] tmp = TextureRegion.split(walkSheet, walkSheet.getWidth() / FRAME_COLS, walkSheet.getHeight() / FRAME_ROWS);
+
+        // Create the walkAnimations array
+        walkAnimations = new Animation[4]; // One for each direction
+
+        // Fill the walkAnimations array with the frames from the sprite sheet
+        for (int i = 0; i < 4; i++) {
+            int startCol = startCols[i];
+            int endCol = endCols[i];
+
+            // Create the frames array with the correct size
+            TextureRegion[] frames = new TextureRegion[endCol - startCol + 1];
+            int index = 0;
+
+            // Fill the frames array with the frames from the startCol to the endCol
+            for (int j = startCol; j <= endCol; j++) {
+                frames[index++] = tmp[0][j];
+            }
+
+            walkAnimations[i] = new Animation<>(0.25f, frames);
+        }
+
+        stateTime = 0f;
     }
 
     public void inputUpdate(float delta) {
         int horizontalForce = 0;
         int verticalForce = 0;
 
+        isMoving = false;
+
         if (Gdx.input.isKeyPressed(moveLeft)) {
             horizontalForce -= 1;
             body.setTransform(body.getPosition(), (float) Math.PI);
             sprite.setRotation(180);
             facingDirection = FacingDirection.LEFT;
+            isMoving = true;
         }
         if (Gdx.input.isKeyPressed(moveRight)) {
             horizontalForce += 1;
             body.setTransform(body.getPosition(), 0f);
             sprite.setRotation(0);
             facingDirection = FacingDirection.RIGHT;
+            isMoving = true;
         }
         if (Gdx.input.isKeyPressed(moveUp)) {
             verticalForce += 1;
             body.setTransform(body.getPosition(), (float) (Math.PI / 2));
             sprite.setRotation(90);
             facingDirection = FacingDirection.UP;
+            isMoving = true;
         }
         if (Gdx.input.isKeyPressed(moveDown)) {
             verticalForce -= 1;
             body.setTransform(body.getPosition(), (float) (3 * Math.PI / 2));
             sprite.setRotation(270);
             facingDirection = FacingDirection.DOWN;
+            isMoving = true;
         }
 
         if (horizontalForce == 0 && verticalForce == 0) {
@@ -167,17 +220,25 @@ public class Player{
         playerFixture.shape = shape;
         playerFixture.density = 1.0f;
 
-
-
-
         this.body = world.createBody(def);
         this.body.createFixture(playerFixture).setUserData("Player");
     }
 
+    public Animation<TextureRegion> getAnimation(int direction) {
+        return walkAnimations[direction];
+    }
+
     public void draw(Batch batch){
-        sprite.setPosition(body.getPosition().x * PPM - sprite.getWidth() / 2, body.getPosition().y * PPM - sprite.getHeight() / 2);
-        sprite.draw(batch);
-//        batch.draw(sprite, body.getPosition().x * PPM - sprite.getWidth() / 2, body.getPosition().y * PPM - sprite.getHeight() / 2, 64, 64);
+        stateTime += Gdx.graphics.getDeltaTime();
+
+        if(!isMoving){
+            stateTime = 0;
+        }
+
+
+        TextureRegion currentFrame = getAnimation(facingDirection.ordinal()).getKeyFrame(stateTime, true);
+
+        batch.draw(currentFrame, body.getPosition().x * PPM - sprite.getWidth() / 2, body.getPosition().y * PPM - sprite.getHeight() / 2, 32, 32);
     }
 }
 

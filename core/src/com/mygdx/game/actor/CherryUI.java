@@ -41,7 +41,7 @@ public class CherryUI extends Table {
             this.add(progressBar).fill().padLeft(100).padRight(100).colspan(cherry.getRequirements().size()).expandY();
 
             this.row();
-            this.add(new Image(new Texture("Cherry.png"))).size(400,400).expand().left().bottom().colspan(cherry.getRequirements().size());
+            this.add(new Image(new Texture("Cherry.png"))).size(600,600).expand().left().bottom().colspan(cherry.getRequirements().size());
         }
 
         progressBar.setValue(cherry.getCurrentTime());

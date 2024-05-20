@@ -375,13 +375,15 @@ public class GameplayScreen implements Screen {
     public static void renderFood(){
         for(Iterator<Food> it = foodsToBeAdded.iterator(); it.hasNext();){
             Food food = it.next();
-            if(!world.isLocked()){
-                if(food.generateToWorld()){
-                    foods.add(food);
-                    it.remove();
-                }
+
+            if(food.generateToWorld()){
+                foods.add(food);
+
             }
+
         }
+
+        foodsToBeAdded.clear();
     }
 
     public static void removeFood(){

@@ -1,31 +1,53 @@
 package com.mygdx.game.utils;
 
+import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import static com.mygdx.game.utils.Constants.PPM;
 
 public class DropOff {
     public Body body;
 
-    public DropOff(World world, int x, int y, int w, int h){
-        createDropOff(world, x, y, w, h);
+    public DropOff(World world, TiledMap map){
+        createDropOff(world, map);
     }
 
-    private void createDropOff(World world, int x, int y, int w, int h){
-        BodyDef def = new BodyDef();
-        def.type = BodyDef.BodyType.StaticBody;
-        def.position.set(x / PPM, y / PPM);
-        def.fixedRotation = true;
+    public void createDropOff(World world, TiledMap map) {
+        MapLayer layer = map.getLayers().get("DropOff");
 
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox( w / 2 / PPM,  h / 2 / PPM);
+        if (layer == null) {
+            throw new GdxRuntimeException("Layer 'DropOff' not found in the map");
+        }
 
-        FixtureDef playerFixture = new FixtureDef();
-        playerFixture.shape = shape;
-        playerFixture.density = 1.0f;
-        playerFixture.isSensor = true;
+        MapObjects objects = layer.getObjects();
 
-        this.body = world.createBody(def);
-        this.body.createFixture(playerFixture).setUserData("Sensor");
+        for (MapObject object : objects) {
+            if (object instanceof RectangleMapObject) {
+                RectangleMapObject rectangleObject = (RectangleMapObject) object;
+                Rectangle rectangle = rectangleObject.getRectangle();
+
+                BodyDef def = new BodyDef();
+                def.type = BodyDef.BodyType.StaticBody;
+                def.position.set((rectangle.x + rectangle.width / 2) / PPM, (rectangle.y + rectangle.height / 2) / PPM);
+                def.fixedRotation = true;
+
+                PolygonShape shape = new PolygonShape();
+                shape.setAsBox(rectangle.width / 2 / PPM, rectangle.height / 2 /PPM);
+
+                FixtureDef playerFixture = new FixtureDef();
+                playerFixture.shape = shape;
+                playerFixture.density = 1.0f;
+//                playerFixture.isSensor = true;
+
+                this.body = world.createBody(def);
+                this.body.createFixture(playerFixture).setUserData("Sensor");
+            }
+        }
     }
 }

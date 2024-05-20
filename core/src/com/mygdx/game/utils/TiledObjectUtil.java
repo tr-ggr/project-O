@@ -4,6 +4,7 @@ import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.PolylineMapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.mygdx.game.model.Task;
@@ -73,9 +74,10 @@ public class TiledObjectUtil {
             Object timeProperty = object.getProperties().get("Time");
             if (timeProperty != null) {
                 System.out.println(((RectangleMapObject) object).getRectangle());
-                if(object.getProperties().get("Key") == null)
+                if(object.getProperties().get("Key") == null) {
+                    System.out.println("Created Task: " + object.getName() + " with output: " + object.getProperties().get("Output").toString() + " and time: " + Integer.parseInt(timeProperty.toString()));
                     taskController.addTask(new Task(object.getName(), object.getProperties().get("Output").toString(), Integer.parseInt(timeProperty.toString()), ((RectangleMapObject) object).getRectangle()));
-                else{
+                }else{
                     taskController.addTask(new Task(object.getName(), object.getProperties().get("Output").toString(), Integer.parseInt(timeProperty.toString()), ((RectangleMapObject) object).getRectangle(), object.getProperties().get("Key").toString()));
                     System.out.println("Key: " + object.getProperties().get("Key").toString());
                 }
@@ -83,6 +85,41 @@ public class TiledObjectUtil {
                 System.out.println("Warning: Time property is missing for object " + object.getName());
             }
 
+
+            shape.dispose();
+        }
+    }
+
+    public static void parseDropOff(World world, MapObjects objects) {
+        for (MapObject object : objects) {
+            Shape shape;
+
+            if (object instanceof PolylineMapObject) {
+                shape = createPolyline((PolylineMapObject) object);
+            } else if (object instanceof RectangleMapObject) {
+                shape = createRectangle((RectangleMapObject) object);
+            } else {
+                continue;
+            }
+
+            BodyDef def = new BodyDef();
+            def.type = BodyDef.BodyType.StaticBody;
+            def.fixedRotation = true;
+
+            // Assuming x, y, w, h are the position and dimensions of the object
+            Rectangle rect = ((RectangleMapObject) object).getRectangle();
+            def.position.set(rect.x / PPM, rect.y / PPM);
+
+            PolygonShape polygonShape = new PolygonShape();
+            polygonShape.setAsBox(rect.width / 2 / PPM, rect.height / 2 / PPM);
+
+            FixtureDef fixtureDef = new FixtureDef();
+            fixtureDef.shape = polygonShape;
+            fixtureDef.density = 1.0f;
+            fixtureDef.isSensor = true;
+
+            Body body = world.createBody(def);
+            body.createFixture(fixtureDef).setUserData("Sensor");
 
             shape.dispose();
         }

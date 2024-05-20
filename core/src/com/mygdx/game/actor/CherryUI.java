@@ -45,7 +45,6 @@ public class CherryUI extends Table {
         }
 
         progressBar.setValue(cherry.getCurrentTime());
-        System.out.println(cherry.getCurrentTime());
     }
 
     public void setCherry(NPC cherry) {
@@ -55,13 +54,9 @@ public class CherryUI extends Table {
         size = cherry.getRequirements().size();
 
         progressBar = new ProgressBar(0, 40f, 1f, false, progressskin);
+
         this.clearChildren();
         this.bottom().left();
-//        cherryUI.add(foodImage).size(100, 100).uniform().space(10);
-//        table.add(new Image(TextureAssetManager.getTexture("Bread"))).size(100, 100).uniform().space(10);
-//        this.add(new Image(TextureAssetManager.getTexture("Bread"))).size(100, 100).space(5);
-//        this.add(new Image(TextureAssetManager.getTexture("Bread"))).size(100, 100).space(5);
-//        this.add(new Image(TextureAssetManager.getTexture("Bread"))).size(100, 100).space(5);
 
         for(String requirement : cherry.getRequirements()) {
             this.add(new Image(TextureAssetManager.getTexture(requirement))).size(100, 100).space(5);
@@ -71,7 +66,7 @@ public class CherryUI extends Table {
         this.add(progressBar).fill().padLeft(100).padRight(100).colspan(cherry.getRequirements().size()).expandY();
 
         this.row();
-        this.add(new Image(new Texture("Cherry.png"))).size(400,400).expand().left().bottom().colspan(cherry.getRequirements().size());
+        this.add(new Image(new Texture("Cherry.png"))).size(600,600).expand().left().bottom().colspan(cherry.getRequirements().size());
 
         progressBar.setValue(cherry.getCurrentTime());
     }

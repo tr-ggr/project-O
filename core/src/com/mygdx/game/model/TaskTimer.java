@@ -44,7 +44,7 @@ public class TaskTimer implements Runnable{
                 Thread.currentThread().interrupt();
                 return;
             }
-            System.out.println(timeLeft + " seconds left!");
+//            System.out.println(timeLeft + " seconds left!");
         }
 //        System.out.println("Task completed!");
         // Notify observers that the task is completed

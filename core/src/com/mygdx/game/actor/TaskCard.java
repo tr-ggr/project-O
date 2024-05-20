@@ -71,7 +71,7 @@ public class TaskCard extends Table {
 //        System.out.println(currentTime);
 
         if(currentTime <= 0){
-            System.out.println("TaskCard has run out of time");
+//            System.out.println("TaskCard has run out of time");
             currentTime = 0;
         }
 

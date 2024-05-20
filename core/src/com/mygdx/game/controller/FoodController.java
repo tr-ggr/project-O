@@ -6,16 +6,20 @@ public class FoodController {
     private final ArrayList<String> foodList = new ArrayList<>();
 
     public FoodController(){
-        foodList.add("Bread");
-        foodList.add("Spoon");
+        foodList.add("LessonDraft");
+        foodList.add("Pencil");
+        foodList.add("Post-it");
+        foodList.add("Booklet");
+        foodList.add("MoM");
+        foodList.add("Paper");
     }
 
     public boolean isFood(String food){
         if(foodList.contains(food)){
-            System.out.println(food + " is food");
+//            System.out.println(food + " is food");
             return true;
         } else {
-            System.out.println(food + " is not food");
+//            System.out.println(food + " is not food");
             return false;
         }
     }

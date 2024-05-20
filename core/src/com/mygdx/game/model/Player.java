@@ -7,7 +7,14 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.MapObjects;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -36,37 +43,43 @@ public class Player{
     // The walk animations for each direction
     private Animation[] walkAnimations; // Must declare frame type (TextureRegion)
 
+    private Animation[] grabAnimations;
+
     Texture walkSheet;
     // A variable for tracking elapsed time for the animation
     float stateTime;
 
 
-    public Player(World world, int x, int y, boolean isPlayer1){
-        createPlayerBody(world, x, y, 32, 32);
-        sprite = new Sprite(new Texture("serato_down.png"));
+    public Player(World world, TiledMap map){
+        createPlayer(map ,world);
+        sprite = new Sprite(new Texture("serato-64x64.png"));
+//        sprite.setSize(64, 64);
+//        sprite.setOriginCenter();
 
-        if(isPlayer1){
-            moveUp = Input.Keys.UP;
-            moveDown = Input.Keys.DOWN;
-            moveRight = Input.Keys.RIGHT;
-            moveLeft = Input.Keys.LEFT;
 
-            interact = Input.Keys.K;
-            grab = Input.Keys.L;
-        } else {
-            moveUp = Input.Keys.W;
-            moveDown = Input.Keys.S;
-            moveRight = Input.Keys.D;
-            moveLeft = Input.Keys.A;
+//
+//        moveUp = Input.Keys.UP;
+//        moveDown = Input.Keys.DOWN;
+//        moveRight = Input.Keys.RIGHT;
+//        moveLeft = Input.Keys.LEFT;
+//
+//        interact = Input.Keys.K;
+//        grab = Input.Keys.L;
 
-            interact = Input.Keys.O;
-            grab = Input.Keys.P;
-        }
+        moveUp = Input.Keys.W;
+        moveDown = Input.Keys.S;
+        moveRight = Input.Keys.D;
+        moveLeft = Input.Keys.A;
 
-        createPlayerAnimations();
+        interact = Input.Keys.O;
+        grab = Input.Keys.P;
+
+
+        createPlayerWalkingAnimations();
+        createPlayerGrabbingAnimations();
     }
 
-    public void createPlayerAnimations() {
+    public void createPlayerWalkingAnimations() {
         int FRAME_COLS = 16; // Total number of frames in your sprite sheet
         int FRAME_ROWS = 1; // Only one row in the sprite sheet
 
@@ -74,7 +87,7 @@ public class Player{
         int[] startCols = {0, 4, 8, 12}; // Replace with your start columns for each direction
         int[] endCols = {3, 7, 11, 15}; // Replace with your end columns for each direction
 
-        walkSheet = new Texture(Gdx.files.internal("sheets/serato_spritesheet.png"));
+        walkSheet = new Texture(Gdx.files.internal("sheets/serato_spritesheet_64x64.png"));
         TextureRegion[][] tmp = TextureRegion.split(walkSheet, walkSheet.getWidth() / FRAME_COLS, walkSheet.getHeight() / FRAME_ROWS);
 
         // Create the walkAnimations array
@@ -100,40 +113,76 @@ public class Player{
         stateTime = 0f;
     }
 
+    public void createPlayerGrabbingAnimations() {
+        int FRAME_COLS = 16; // Total number of frames in your sprite sheet
+        int FRAME_ROWS = 1; // Only one row in the sprite sheet
+
+        // Define the start and end columns for each direction
+        int[] startCols = {0, 4, 8, 12}; // Replace with your start columns for each direction
+        int[] endCols = {3, 7, 11, 15}; // Replace with your end columns for each direction
+
+        walkSheet = new Texture(Gdx.files.internal("sheets/serato_spritesheet_grabbing_64x64.png"));
+        TextureRegion[][] tmp = TextureRegion.split(walkSheet, walkSheet.getWidth() / FRAME_COLS, walkSheet.getHeight() / FRAME_ROWS);
+
+        // Create the walkAnimations array
+        grabAnimations = new Animation[4]; // One for each direction
+
+        // Fill the walkAnimations array with the frames from the sprite sheet
+        for (int i = 0; i < 4; i++) {
+            int startCol = startCols[i];
+            int endCol = endCols[i];
+
+            // Create the frames array with the correct size
+            TextureRegion[] frames = new TextureRegion[endCol - startCol + 1];
+            int index = 0;
+
+            // Fill the frames array with the frames from the startCol to the endCol
+            for (int j = startCol; j <= endCol; j++) {
+                frames[index++] = tmp[0][j];
+            }
+
+            grabAnimations[i] = new Animation<>(0.25f, frames);
+        }
+
+        stateTime = 0f;
+    }
+
     public void inputUpdate(float delta) {
-        int horizontalForce = 0;
-        int verticalForce = 0;
+        float horizontalForce = 0;
+        float verticalForce = 0;
 
         isMoving = false;
 
         if (Gdx.input.isKeyPressed(moveLeft)) {
-            horizontalForce -= 1;
+            horizontalForce -= 1.5f;
             body.setTransform(body.getPosition(), (float) Math.PI);
             sprite.setRotation(180);
             facingDirection = FacingDirection.LEFT;
             isMoving = true;
         }
         if (Gdx.input.isKeyPressed(moveRight)) {
-            horizontalForce += 1;
+            horizontalForce += 1.5f;
             body.setTransform(body.getPosition(), 0f);
             sprite.setRotation(0);
             facingDirection = FacingDirection.RIGHT;
             isMoving = true;
         }
         if (Gdx.input.isKeyPressed(moveUp)) {
-            verticalForce += 1;
+            verticalForce += 1.5f;
             body.setTransform(body.getPosition(), (float) (Math.PI / 2));
             sprite.setRotation(90);
             facingDirection = FacingDirection.UP;
             isMoving = true;
         }
         if (Gdx.input.isKeyPressed(moveDown)) {
-            verticalForce -= 1;
+            verticalForce -= 1.5f;
             body.setTransform(body.getPosition(), (float) (3 * Math.PI / 2));
             sprite.setRotation(270);
             facingDirection = FacingDirection.DOWN;
             isMoving = true;
         }
+
+
 
         if (horizontalForce == 0 && verticalForce == 0) {
             body.setLinearVelocity(0, 0);
@@ -143,7 +192,7 @@ public class Player{
 
         if (Gdx.input.isKeyJustPressed(grab)) {
             if(isGrabbing){
-                System.out.println("Not Grabbing!");
+//                System.out.println("Not Grabbing!");
                 isGrabbing = false;
                 interactedFood = null;
 
@@ -154,7 +203,7 @@ public class Player{
                 }
             } else {
                 isGrabbing = true;
-                System.out.println("Now grabbing!");
+//                System.out.println("Now grabbing!");
             }
         }
 
@@ -186,18 +235,18 @@ public class Player{
 
         if (Gdx.input.isKeyJustPressed(interact)) {
             if (interactedFixture == null) {
-                System.out.println("No interaction");
+//                System.out.println("No interaction");
             } else if (Objects.equals(interactedFixture.getUserData(), null)) {
-                System.out.println("Interacted with " + interactedFixture.getUserData());
+//                System.out.println("Interacted with " + interactedFixture.getUserData());
             } else {
                 for (Task task : taskController.getTasks()) {
                     if (Objects.equals(interactedFixture.getUserData(), task.name)) {
                         if(task.isEnabled){
-                            System.out.println("Interacted with " + interactedFixture.getUserData());
+//                            System.out.println("Interacted with " + interactedFixture.getUserData());
                             task.interactTimer();
                             break;
                         } else {
-                            System.out.println("Task is not enabled!");
+//                            System.out.println("Task is not enabled!");
                         }
 
                     }
@@ -224,21 +273,56 @@ public class Player{
         this.body.createFixture(playerFixture).setUserData("Player");
     }
 
-    public Animation<TextureRegion> getAnimation(int direction) {
+    private void createPlayer(TiledMap map, World world) {
+        MapLayer layer = map.getLayers().get("Player");
+
+        if (layer == null) {
+            throw new GdxRuntimeException("Layer 'Player' not found in the map");
+        }
+
+        MapObjects objects = layer.getObjects();
+
+//        System.out.println("Checking Layer");
+
+        for (MapObject object : objects) {
+//            System.out.println(object);
+            if (object instanceof RectangleMapObject) {
+                RectangleMapObject rectangleObject = (RectangleMapObject) object;
+                Rectangle rectangle = rectangleObject.getRectangle();
+
+                createPlayerBody(world, (int) rectangle.x, (int) rectangle.y, (int) rectangle.width, (int) rectangle.height);
+
+            }
+        }
+    }
+
+    public Animation<TextureRegion> getWalkAnimation(int direction) {
         return walkAnimations[direction];
     }
 
+    public Animation<TextureRegion> getGrabAnimation(int direction) {
+        return grabAnimations[direction];
+    }
+
     public void draw(Batch batch){
+        TextureRegion currentFrame;
         stateTime += Gdx.graphics.getDeltaTime();
 
         if(!isMoving){
             stateTime = 0;
         }
 
+        if(isGrabbing){
+           currentFrame = getGrabAnimation(facingDirection.ordinal()).getKeyFrame(stateTime, true);
 
-        TextureRegion currentFrame = getAnimation(facingDirection.ordinal()).getKeyFrame(stateTime, true);
+        } else {
+            currentFrame = getWalkAnimation(facingDirection.ordinal()).getKeyFrame(stateTime, true);
+//        batch.draw(currentFrame, body.getPosition().x * PPM - sprite.getWidth() / 2, body.getPosition().y * PPM - sprite.getHeight() / 2);
+        }
 
-        batch.draw(currentFrame, body.getPosition().x * PPM - sprite.getWidth() / 2, body.getPosition().y * PPM - sprite.getHeight() / 2, 32, 32);
+        batch.draw(currentFrame, body.getPosition().x * PPM - sprite.getWidth() / 2, body.getPosition().y * PPM - sprite.getHeight() / 2, 64, 64);
     }
+
+
 }
 

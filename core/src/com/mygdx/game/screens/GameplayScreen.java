@@ -62,7 +62,7 @@ public class GameplayScreen implements Screen {
 
     public static Player player;
 
-    public static ConcurrentLinkedQueue<Food> foods = new ConcurrentLinkedQueue<Food>();
+    public static ArrayList<Food> foods = new ArrayList<Food>();
     public static ArrayList<Food> foodsToBeAdded = new ArrayList<Food>();
 
     private DropOff dropOff;
@@ -105,17 +105,19 @@ public class GameplayScreen implements Screen {
         b2dr = new Box2DDebugRenderer();
         world.setContactListener(new CollisionListener());
 
-        player = new Player(world, 200, 200, false);
 
-        dropOff = new DropOff(world, 50, 75, 32, 32);
+
 
         batch = new SpriteBatch();
         hudBatch = new SpriteBatch();
-        texture = new Texture("download-compresskaru.com.png");
+//        texture = new Texture("download-compresskaru.com.png");
 
-        map = new TmxMapLoader().load("map.tmx");
+//        map = new TmxMapLoader().load("map.tmx");
+        map = new TmxMapLoader().load("map/OvertimeMap.tmx");
         tmr = new OrthogonalTiledMapRenderer(map);
 
+        player = new Player(world, map);
+        dropOff = new DropOff(world, map);
 
 //		Vector3 pos = camera.position;
 //		pos.x = 5000 * PPM;
@@ -124,7 +126,7 @@ public class GameplayScreen implements Screen {
 
         camera.update();
 
-        TiledObjectUtil.parseTaskObjects(world, map.getLayers().get("Testing").getObjects());
+        TiledObjectUtil.parseTaskObjects(world, map.getLayers().get("Tasks").getObjects());
         TiledObjectUtil.parseTiledObjectLayer(world, map.getLayers().get("Border").getObjects());
 
         jointDef = new WeldJointDef();
@@ -172,12 +174,10 @@ public class GameplayScreen implements Screen {
         app.font.draw(app.batch, (int)gameController.timePassed + "", 500 , 60);
         app.batch.end();
 
-        b2dr.render(world, camera.combined.scl(PPM));
+//        b2dr.render(world, camera.combined.scl(PPM));
 
         //Execute handleEvent each 1 second
         gameController.update(Gdx.graphics.getDeltaTime());
-
-        renderFood();
 
         update(Gdx.graphics.getDeltaTime());
 
@@ -194,6 +194,7 @@ public class GameplayScreen implements Screen {
         if(gameController.lives == 0){
             System.out.println("Game Over!");
             System.out.println("Money earned: " + gameController.moneyEarned);
+            System.out.println("Time passed: " + gameController.timePassed);
             Gdx.app.exit();
         }
 
@@ -260,15 +261,14 @@ public class GameplayScreen implements Screen {
 
 //		System.out.println(bodyA.getAngle());
         if(player.facingDirection == FacingDirection.LEFT){
-            bodyB.setTransform(bodyA.getPosition().x - 0.3f , bodyA.getPosition().y, 0);
+            bodyB.setTransform(bodyA.getPosition().x - 0.5f , bodyA.getPosition().y, 0);
         } else if(player.facingDirection == FacingDirection.RIGHT){
-            bodyB.setTransform(bodyA.getPosition().x + 0.3f , bodyA.getPosition().y, 0);
+            bodyB.setTransform(bodyA.getPosition().x + 0.5f , bodyA.getPosition().y, 0);
         } else if(player.facingDirection == FacingDirection.UP){
             bodyB.setTransform(bodyA.getPosition().x, bodyA.getPosition().y + 0.3f, 0);
         } else if(player.facingDirection == FacingDirection.DOWN){
             bodyB.setTransform(bodyA.getPosition().x, bodyA.getPosition().y - 0.3f, 0);
         }
-
 
         WeldJointDef weldJointDef = new WeldJointDef();
         weldJointDef.bodyA = bodyA;
@@ -367,14 +367,21 @@ public class GameplayScreen implements Screen {
 //	}
 
     public static void generateFood(Rectangle body, String foodType, Texture texture){
+        Gdx.app.log("Food", foodType + " generating...");
+        System.out.println("Food: " + body + " is generating " + foodType);
         foodsToBeAdded.add(new Food(foodType, texture, (int) body.x, (int) body.y));
     }
 
     public static void renderFood(){
-        for(Food food: foodsToBeAdded){
-            foods.add(food);
+        for(Iterator<Food> it = foodsToBeAdded.iterator(); it.hasNext();){
+            Food food = it.next();
+            if(!world.isLocked()){
+                if(food.generateToWorld()){
+                    foods.add(food);
+                    it.remove();
+                }
+            }
         }
-        foodsToBeAdded.clear();
     }
 
     public static void removeFood(){
@@ -382,18 +389,28 @@ public class GameplayScreen implements Screen {
         System.out.println("Removing food!");
         for(Iterator<Body> iterator = toBeDeleted.iterator(); iterator.hasNext();){
             Body body = iterator.next();
-            world.destroyBody(body);
-            body.setActive(false);
-//            body = null;
-            iterator.remove();
+            Gdx.app.debug("World", "Destroying " + body + " at " + body.getPosition().x + ", " + body.getPosition().y);
+            System.out.println("World: Destroying " + body + " at " + body.getPosition().x + ", " + body.getPosition().y);
+            if(!world.isLocked()){
+                world.destroyBody(body);
+                body.setActive(false);
+                body = null;
+                iterator.remove();
+            }
+
         }
     }
 
     public static void removeJoints(){
-        if(deleteJoint){
-            world.destroyJoint(grabFood);
-            grabFood = null;
-            deleteJoint = false;
+        if(deleteJoint && grabFood != null){
+            Gdx.app.debug("Joint", grabFood + " is deleted by the world");
+            System.out.println("Joint: " + grabFood + " is deleted by the world!");
+            if(!world.isLocked()){
+                world.destroyJoint(grabFood);
+                grabFood = null;
+                deleteJoint = false;
+            }
+
         }
     }
 
@@ -402,6 +419,8 @@ public class GameplayScreen implements Screen {
             Food food = it.next();
             if(food.isDeleted){
                 System.out.println(food.name + " is submitted!");
+                Gdx.app.debug("Food", food + " is deleted by the world");
+                System.out.println("Food: " + food + " deleted on the world!");
                 it.remove();
             }
         }

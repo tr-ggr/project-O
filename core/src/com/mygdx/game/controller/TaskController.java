@@ -14,7 +14,6 @@ public class TaskController {
 
     public void addTask(Task task){
         tasks.add(task);
-
     }
 
     public boolean isTask(String taskName){

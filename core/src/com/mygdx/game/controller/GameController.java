@@ -1,6 +1,7 @@
 package com.mygdx.game.controller;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -62,12 +63,15 @@ public class GameController {
 
     private Music dean_spawn;
 
+    private Music background_music;
+
     public GameController(final Application app){
         lives = 3;
         moneyEarned = 0;
         this.stageHUD = new Stage(new StretchViewport(Application.V_WIDTH, Application.V_HEIGHT , app.camera));
 
         dean_spawn = Gdx.audio.newMusic(Gdx.files.internal("sfx/dean_spawn.mp3"));
+        background_music = Gdx.audio.newMusic(Gdx.files.internal("music/theme-song.mp3"));
 
         cherryUI = new CherryUI();
         cherryUI.setVisible(false);
@@ -90,6 +94,12 @@ public class GameController {
 
 //        stageHUD.setDebugAll(true);
 
+        background_music.play();
+        background_music.setLooping(true);
+        background_music.setVolume(0.1f);
+
+        dean_spawn.setVolume(2f);
+
 
 
 
@@ -110,6 +120,19 @@ public class GameController {
 //
 //        }
 
+        if(Gdx.input.isKeyPressed(Input.Keys.SPACE)){
+            if(!hasCherry){
+                dean_spawn.play();
+                Cherry = new NPC("Cherry", 40, 3);
+                System.out.println("Generated Ma'am Dean NPC!");
+                hasCherry = true;
+                cherryUI.setCherry(Cherry);
+                cherryUI.setVisible(true);
+            }
+        }
+
+
+
 
 
 
@@ -119,13 +142,13 @@ public class GameController {
         if(phase == PHASE.PHASE3){
             if(random.nextInt(2) == 1 && !hasCherry) {
                 Cherry = new NPC("Cherry", 40, 3);
-                System.out.println("Generated Ma'am Dean NPC!");
+//                System.out.println("Generated Ma'am Dean NPC!");
                 hasCherry = true;
                 cherryUI.setCherry(Cherry);
                 cherryUI.setVisible(true);
                 dean_spawn.play();
             } else {
-                System.out.println("Generated a normal NPC!");
+//                System.out.println("Generated a normal NPC!");
                 curr = new NPC(npcs.size() + 1 + "", 25, 1);
                 card = new TaskCard(curr.getRequirements().get(0), curr.maxTime);
                 npcs.add(curr);
@@ -133,7 +156,7 @@ public class GameController {
                 flexBox.add(card).space(10);
             }
         } else if (phase == PHASE.PHASE1){
-            System.out.println("Generated a normal NPC!");
+//            System.out.println("Generated a normal NPC!");
             curr = new NPC(npcs.size() + 1 + "", 25, 1);
             card = new TaskCard(curr.getRequirements().get(0), curr.maxTime);
             npcs.add(curr);
@@ -142,13 +165,13 @@ public class GameController {
         } else {
             if(random.nextInt(2) == 1 && !hasCherry) {
                 Cherry = new NPC("Cherry", 40, 2);
-                System.out.println("Generated Ma'am Dean NPC!");
+//                System.out.println("Generated Ma'am Dean NPC!");
                 hasCherry = true;
                 cherryUI.setCherry(Cherry);
                 cherryUI.setVisible(true);
                 dean_spawn.play();
             } else {
-                System.out.println("Generated a normal NPC!");
+//                System.out.println("Generated a normal NPC!");
                 curr = new NPC(npcs.size() + 1 + "", 25, 1);
                 card = new TaskCard(curr.getRequirements().get(0), curr.maxTime);
                 npcs.add(curr);

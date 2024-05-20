@@ -20,7 +20,7 @@ public class NPC {
         this.maxTime = maxTime;
         this.currentTime = maxTime;
         generateRequirements(n);
-        System.out.println("NPC " + id + " has been created with requirements: " + requirements.toString());
+//        System.out.println("NPC " + id + " has been created with requirements: " + requirements.toString());
     }
 
     public float getCurrentTime() {
@@ -37,7 +37,7 @@ public class NPC {
     public boolean updateTimer(float delta){
         currentTime -= delta;
         if(currentTime <= 0){
-            System.out.println("NPC " + id + " has run out of time");
+//            System.out.println("NPC " + id + " has run out of time");
             return true;
         }
         return false;
@@ -48,7 +48,7 @@ public class NPC {
             String req = it.next();
             if(req.equals(food)){
                 it.remove();
-                System.out.println("NPC " + id + " has eaten " + food);
+//                System.out.println("NPC " + id + " has eaten " + food);
                 return true;
             }
         }

@@ -85,16 +85,18 @@ public class backup_mygdxgame extends Game {
         b2dr = new Box2DDebugRenderer();
         world.setContactListener(new CollisionListener());
 
-        player = new Player(world, 200, 200, false);
 
-        dropOff = new DropOff(world, 50, 75, 32, 32);
+
+        dropOff = new DropOff(world, map);
 
         batch = new SpriteBatch();
         hudBatch = new SpriteBatch();
         texture = new Texture("download-compresskaru.com.png");
 
-        map = new TmxMapLoader().load("map.tmx");
+        map = new TmxMapLoader().load("map/OvertimeMap.tmx");
         tmr = new OrthogonalTiledMapRenderer(map);
+
+        player = new Player(world, map);
 
 
 //		Vector3 pos = camera.position;
@@ -104,7 +106,7 @@ public class backup_mygdxgame extends Game {
 
         camera.update();
 
-        TiledObjectUtil.parseTaskObjects(world, map.getLayers().get("Testing").getObjects());
+        TiledObjectUtil.parseTaskObjects(world, map.getLayers().get("Tasks").getObjects());
         TiledObjectUtil.parseTiledObjectLayer(world, map.getLayers().get("Border").getObjects());
 
         jointDef = new WeldJointDef();

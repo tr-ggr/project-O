@@ -17,8 +17,8 @@ public class CollisionListener implements ContactListener {
 
         player.interactedFixture = fB;
 
-        System.out.println(fA + " Collides with " + fB);
-        System.out.println(fA.getUserData() + " Collides with " + fB.getUserData());
+//        System.out.println(fA + " Collides with " + fB);
+//        System.out.println(fA.getUserData() + " Collides with " + fB.getUserData());
 
         checkFixtures(fA, fB);
         checkFixtures(fB, fA);

@@ -147,6 +147,22 @@ public class GameplayScreen implements Screen {
         Gdx.gl.glClearColor(.25f, .25f, .25f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+
+
+//        b2dr.render(world, camera.combined.scl(PPM));
+
+        //Execute handleEvent each 1 second
+        gameController.update(Gdx.graphics.getDeltaTime());
+
+        update(Gdx.graphics.getDeltaTime());
+
+        renderFood();
+        grabFood();
+        removeJoints();
+        removeFood();
+        destroyFood();
+
+        //Render Assets
         // Render the game world
         tmr.render();
 
@@ -173,19 +189,6 @@ public class GameplayScreen implements Screen {
         app.font.draw(app.batch, gameController.moneyEarned + "", 80 , 60);
         app.font.draw(app.batch, (int)gameController.timePassed + "", 500 , 60);
         app.batch.end();
-
-//        b2dr.render(world, camera.combined.scl(PPM));
-
-        //Execute handleEvent each 1 second
-        gameController.update(Gdx.graphics.getDeltaTime());
-
-        update(Gdx.graphics.getDeltaTime());
-
-        renderFood();
-        grabFood();
-        removeJoints();
-        removeFood();
-        destroyFood();
 
         if(Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)){
             Gdx.app.exit();
@@ -375,14 +378,10 @@ public class GameplayScreen implements Screen {
     public static void renderFood(){
         for(Iterator<Food> it = foodsToBeAdded.iterator(); it.hasNext();){
             Food food = it.next();
-
             if(food.generateToWorld()){
                 foods.add(food);
-
             }
-
         }
-
         foodsToBeAdded.clear();
     }
 
@@ -391,11 +390,17 @@ public class GameplayScreen implements Screen {
         System.out.println("Removing food!");
         for(Iterator<Body> iterator = toBeDeleted.iterator(); iterator.hasNext();){
             Body body = iterator.next();
-            Gdx.app.debug("World", "Destroying " + body + " at " + body.getPosition().x + ", " + body.getPosition().y);
-            System.out.println("World: Destroying " + body + " at " + body.getPosition().x + ", " + body.getPosition().y);
+//            Gdx.app.debug("World", "Destroying " + body + " at " + body.getPosition().x + ", " + body.getPosition().y);
+//            System.out.println("World: Destroying " + body + " at " + body.getPosition().x + ", " + body.getPosition().y);
             if(!world.isLocked()){
-                world.destroyBody(body);
+
+
+                System.out.println("Food: " + body + " is set to Inactive by the world!");
                 body.setActive(false);
+
+                System.out.println("Food: " + body + " is deleted by the world!");
+                world.destroyBody(body);
+
                 body = null;
                 iterator.remove();
             }

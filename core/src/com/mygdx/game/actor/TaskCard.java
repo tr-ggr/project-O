@@ -37,7 +37,6 @@ public class TaskCard extends Table {
         Image foodImage = new Image(TextureAssetManager.getTexture(requirement));
         taskName.setFontScale(3f);
 
-
         progressBar = new ProgressBar(0.0f, time, 1.0f, false, progressskin);
         progressBar.setValue(time);
         progressBar.setAnimateDuration(0);

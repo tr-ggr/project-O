@@ -171,8 +171,11 @@ public class GameplayScreen implements Screen {
         player.draw(batch);
 
         for (Food food : foods) {
-            food.draw(batch);
+            if (!food.isDeleted) {
+                food.draw(batch);
+            }
         }
+
         batch.end();
 
         // Render the tasks
@@ -388,24 +391,18 @@ public class GameplayScreen implements Screen {
     public static void removeFood(){
         if(toBeDeleted.isEmpty()) return;
         System.out.println("Removing food!");
-        for(Iterator<Body> iterator = toBeDeleted.iterator(); iterator.hasNext();){
-            Body body = iterator.next();
-//            Gdx.app.debug("World", "Destroying " + body + " at " + body.getPosition().x + ", " + body.getPosition().y);
-//            System.out.println("World: Destroying " + body + " at " + body.getPosition().x + ", " + body.getPosition().y);
+
+        for (Body body : toBeDeleted){
             if(!world.isLocked()){
-
-
                 System.out.println("Food: " + body + " is set to Inactive by the world!");
                 body.setActive(false);
 
                 System.out.println("Food: " + body + " is deleted by the world!");
                 world.destroyBody(body);
-
-                body = null;
-                iterator.remove();
             }
-
         }
+
+        toBeDeleted.clear();
     }
 
     public static void removeJoints(){
@@ -426,7 +423,6 @@ public class GameplayScreen implements Screen {
             Food food = it.next();
             if(food.isDeleted){
                 System.out.println(food.name + " is submitted!");
-                Gdx.app.debug("Food", food + " is deleted by the world");
                 System.out.println("Food: " + food + " deleted on the world!");
                 it.remove();
             }

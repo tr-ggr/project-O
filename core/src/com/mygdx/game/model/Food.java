@@ -29,8 +29,8 @@ public class Food {
     }
 
     public void draw(Batch batch){
+        System.out.println("Drawing " + body + " to the world...");
         if(!body.isActive()){
-//            sprite.getTexture().dispose();
             System.out.println("Body is null");
             isDeleted = true;
             return;

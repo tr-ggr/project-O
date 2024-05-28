@@ -129,6 +129,7 @@ public class GameController {
                 cherryUI.setCherry(Cherry);
                 cherryUI.setVisible(true);
             }
+            return;
         }
 
 

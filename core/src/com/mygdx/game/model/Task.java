@@ -1,8 +1,12 @@
 // Task.java
 package com.mygdx.game.model;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 
 import java.beans.PropertyChangeEvent;
@@ -25,9 +29,14 @@ public class Task implements PropertyChangeListener {
 
     public Sprite sprite;
 
+    public Animation<TextureRegion>  countdownAnimation;
+
+    float stateTime = 0f;
+
     public Task(String name, String foodName, int time, Rectangle body){
         this.name = name;
         this.runnableTimer = new TaskTimer(time);
+        this.time = time;
         this.thread = new Thread(runnableTimer);
         this.body = body;
         this.key = null;
@@ -35,6 +44,13 @@ public class Task implements PropertyChangeListener {
         this.foodName = foodName;
         this.runnableTimer.addPropertyChangeListener(this);
 
+        if(time == 5) {
+            countdownAnimation = textureAssetManager.countdownAnimations[2];
+        } else if(time == 3) {
+            countdownAnimation = textureAssetManager.countdownAnimations[1];
+        } else if(time == 2) {
+            countdownAnimation = textureAssetManager.countdownAnimations[0];
+        }
     }
 
     public Task(String name, String foodName, int time, Rectangle body, String key){
@@ -42,6 +58,7 @@ public class Task implements PropertyChangeListener {
         this.runnableTimer = new TaskTimer(time);
         this.thread = new Thread(runnableTimer);
         this.body = body;
+        this.time = time;
         this.key = key;
         this.isEnabled = false;
         this.foodName = foodName;
@@ -49,7 +66,19 @@ public class Task implements PropertyChangeListener {
         this.sprite = new Sprite(textureAssetManager.getTexture(key));
         sprite.setPosition((body.x) + (body.getWidth() / 2),
                 (body.y));
+
+        if(time == 5) {
+            countdownAnimation = textureAssetManager.countdownAnimations[2];
+        } else if(time == 3) {
+            countdownAnimation = textureAssetManager.countdownAnimations[1];
+        } else if(time == 2) {
+            countdownAnimation = textureAssetManager.countdownAnimations[0];
+        }
+
+
     }
+
+
 
     public void interactTimer(){
 //        System.out.println(thread.getState());
@@ -81,46 +110,34 @@ public class Task implements PropertyChangeListener {
         }
     }
 
+
+
     public void drawTask(SpriteBatch batch){
-        font.setColor(0f, 0f, 0f, 1.0f);
+        TextureRegion currentFrame;
+
         float x = this.body.x + this.body.width / 2 - 16;
         float y = this.body.y  + this.body.height ;
-//        System.out.println("Drawing task + " + this.body.getPosition().x);
 
         if(isEnabled && key != null) sprite.draw(batch);
 
+        int frameIndex = (int) (runnableTimer.timeLeft / (float) time * countdownAnimation.getKeyFrames().length);
+        frameIndex = Math.min(frameIndex, countdownAnimation.getKeyFrames().length - 1); // Ensure the index is within bounds
+
+
         if(thread.getState().equals(Thread.State.TERMINATED)) {
-//            font.draw(batch, "Task completed!", x, y);
             thread = new Thread(runnableTimer);
 
-            batch.draw(textureAssetManager.getTexture("SB_Check"), x, y);
-        } else if(thread.getState().equals(Thread.State.WAITING)){
-            batch.draw(textureAssetManager.getTexture("SpeechBubbleEmpty"), x, y);
-            // Calculate the position for the font
-            float fontX = x + (float) textureAssetManager.getTexture("SpeechBubbleEmpty").getWidth() / 2 - 5;
-            float fontY = y + (float) textureAssetManager.getTexture("SpeechBubbleEmpty").getHeight() / 2 + 8;
-
-            // Draw the font at the calculated position
-            font.draw(batch, runnableTimer.timeLeft + "", fontX, fontY);
-        } else if(thread.getState().equals(Thread.State.TIMED_WAITING)){
-            batch.draw(textureAssetManager.getTexture("SpeechBubbleEmpty"), x, y);
-
-            // Calculate the position for the font
-            float fontX = x + (float) textureAssetManager.getTexture("SpeechBubbleEmpty").getWidth() / 2 - 5;
-            float fontY = y + (float) textureAssetManager.getTexture("SpeechBubbleEmpty").getHeight() / 2 + 8;
-
-            // Draw the font at the calculated position
-            font.draw(batch, runnableTimer.timeLeft + "", fontX, fontY);
+            currentFrame = countdownAnimation.getKeyFrames()[(time - runnableTimer.timeLeft)];
+            batch.draw(currentFrame, x, y);
+        } else if(thread.getState().equals(Thread.State.WAITING) || thread.getState().equals(Thread.State.TIMED_WAITING)){
+            currentFrame = countdownAnimation.getKeyFrames()[(time - runnableTimer.timeLeft)];
+            batch.draw(currentFrame, x, y);
         } else if (isEnabled){
-//            font.draw(batch, "Press SPACE to interact", x, y);
             batch.draw(textureAssetManager.getTexture("SB_CKey"), x, y);
         } else {
-//            font.draw(batch, "Task is not enabled", x, y);
-//            System.out.println(key);
             batch.draw(textureAssetManager.getTexture(key + "SB"), x, y);
         }
     }
-
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {

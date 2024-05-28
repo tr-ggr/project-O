@@ -27,7 +27,7 @@ public class Application extends Game {
         font = new BitmapFont();
         font.getData().setScale(2f);
 
-        this.setScreen(new GameplayScreen(this));
+        this.setScreen(new LoginScreen(this));
     }
 
     @Override

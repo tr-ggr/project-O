@@ -392,13 +392,12 @@ public class GameplayScreen implements Screen {
                 for(Food foods : foods){
                     if(foods.body == body){
                         foods.isDeleted = true;
+                        break;
                     }
                 }
 
                 System.out.println("Food: " + body + " is deleted by the world!");
                 world.destroyBody(body);
-
-
             }
         }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="35" height="25" tilewidth="32" tileheight="32" infinite="0" nextlayerid="23" nextobjectid="67">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="35" height="25" tilewidth="32" tileheight="32" infinite="0" nextlayerid="24" nextobjectid="69">
  <tileset firstgid="1" name="Room_Builder_free_32x32" tilewidth="32" tileheight="32" tilecount="391" columns="17">
   <image source="TileSets/Room_Builder_free_32x32.png" width="544" height="736"/>
  </tileset>
@@ -388,7 +388,7 @@
  <objectgroup id="19" name="Border">
   <object id="11" x="658" y="480" width="12" height="202.667"/>
   <object id="12" x="657.333" y="478.667" width="398" height="62.6667"/>
-  <object id="14" x="29" y="733" width="1057" height="34"/>
+  <object id="14" x="29" y="736" width="1057" height="31"/>
   <object id="15" x="1055" y="33" width="33" height="732"/>
   <object id="17" x="30" y="24" width="97" height="740"/>
   <object id="18" x="21.3333" y="26.6667" width="1066.67" height="96"/>
@@ -400,10 +400,10 @@
   <object id="26" x="862.667" y="206" width="30.6667" height="271.333"/>
   <object id="27" x="771.333" y="430" width="122.667" height="45.3333"/>
   <object id="28" x="1012.67" y="123.333" width="40.6667" height="352.667"/>
-  <object id="30" x="294" y="613" width="76" height="42"/>
-  <object id="31" x="293" y="614" width="32" height="76"/>
-  <object id="32" x="423" y="615.333" width="80" height="43"/>
-  <object id="33" x="475.667" y="618.667" width="26" height="72"/>
+  <object id="30" x="287.75" y="608.5" width="95.5" height="63.25"/>
+  <object id="31" x="287.75" y="608.25" width="33" height="95.75"/>
+  <object id="32" x="416.75" y="607.833" width="95" height="63.25"/>
+  <object id="33" x="480.417" y="618.667" width="31" height="85.25"/>
   <object id="34" x="327" y="703.667" width="147" height="29.6667"/>
   <object id="62" x="873.667" y="539.333" width="110.667" height="41"/>
   <object id="63" x="680.667" y="570" width="50" height="44"/>
@@ -413,7 +413,10 @@
   <object id="65" name="drop_off" x="544.833" y="308.333" width="92.3333" height="73.3333"/>
  </objectgroup>
  <objectgroup id="22" name="Player">
-  <object id="66" x="152" y="178" width="32" height="32"/>
+  <object id="67" x="154.25" y="173.5" width="32" height="32"/>
+ </objectgroup>
+ <objectgroup id="23" name="Player2">
+  <object id="68" x="155.25" y="214.25" width="32" height="32"/>
  </objectgroup>
  <objectgroup id="20" name="Tasks">
   <object id="46" name="telephone" x="765" y="197.667" width="48.3333" height="57.6667">

@@ -3,6 +3,8 @@ package com.mygdx.game.controller;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.controllers.Controller;
+import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -25,6 +27,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
+import static com.mygdx.game.screens.GameplayScreen.player;
+import static com.mygdx.game.screens.GameplayScreen.player2;
+
 
 public class GameController {
     public Stage stageHUD;
@@ -35,6 +40,7 @@ public class GameController {
 
     public int lives;
     public int moneyEarned;
+    public boolean isMultiplayer;
 
     public float timeSeconds = 0f;
     public float spawnRate = 30f;
@@ -64,6 +70,8 @@ public class GameController {
     private Music dean_spawn;
 
     private Music background_music;
+
+    public static Controller controller;
 
     public GameController(final Application app){
         lives = 3;
@@ -119,6 +127,7 @@ public class GameController {
 //            cherryUI.setVisible(true);
 //
 //        }
+
 
         if(Gdx.input.isKeyPressed(Input.Keys.SPACE)){
             if(!hasCherry){
@@ -180,6 +189,7 @@ public class GameController {
                 flexBox.add(card).space(10);
             }
         }
+
     }
 
     public void update(float delta){

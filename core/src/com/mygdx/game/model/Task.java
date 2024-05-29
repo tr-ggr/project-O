@@ -81,10 +81,18 @@ public class Task implements PropertyChangeListener {
 
 
     public void interactTimer(){
+        System.out.println("Interacting with task " + name);
+
+        if (thread == null || runnableTimer == null) {
+            return; // Don't proceed if thread or runnableTimer is null
+        }
+
+        System.out.println("Proceeding");
 //        System.out.println(thread.getState());
         if(thread.getState().equals(Thread.State.TERMINATED)) {
             thread = new Thread(runnableTimer);
         }
+
         if(thread.getState().equals(Thread.State.NEW)) thread.start();
         if(thread.getState().equals(Thread.State.WAITING)){
             synchronized (runnableTimer) {
@@ -133,7 +141,7 @@ public class Task implements PropertyChangeListener {
             currentFrame = countdownAnimation.getKeyFrames()[(time - runnableTimer.timeLeft)];
             batch.draw(currentFrame, x, y);
         } else if (isEnabled){
-            batch.draw(textureAssetManager.getTexture("SB_CKey"), x, y);
+            batch.draw(textureAssetManager.getTexture("SB_Check"), x, y);
         } else {
             batch.draw(textureAssetManager.getTexture(key + "SB"), x, y);
         }

@@ -22,6 +22,7 @@ public class TextureAssetManager {
         textures.put("Pencil", new Texture("holdable/Pencil.png"));
         textures.put("Coffee", new Texture("coffee.png"));
         textures.put("LessonDraft", new Texture("holdable/LessonDraft.png"));
+        textures.put("GradedPaper", new Texture("holdable/GradedPaper.png"));
 
         //taskAssets
         textures.put("SpeechBubbleEmpty", new Texture("taskAsset/SpeechBubbleEmpty.png"));
@@ -32,6 +33,7 @@ public class TextureAssetManager {
         textures.put("PencilSB", new Texture("taskAsset/PencilSB.png"));
         textures.put("PaperSB", new Texture("taskAsset/PaperSB.png"));
         textures.put("BookletSB", new Texture("taskAsset/BookletSB.png"));
+
 
         createCountdownAnimations();
     }

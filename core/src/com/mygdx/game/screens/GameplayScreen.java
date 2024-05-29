@@ -2,6 +2,8 @@ package com.mygdx.game.screens;
 
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.controllers.Controller;
+import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -22,16 +24,15 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.mygdx.game.controller.FoodController;
 import com.mygdx.game.controller.GameController;
 import com.mygdx.game.controller.TaskController;
+import com.mygdx.game.controller.XboxControllerListener;
 import com.mygdx.game.model.*;
-import com.mygdx.game.utils.CollisionListener;
-import com.mygdx.game.utils.DropOff;
-import com.mygdx.game.utils.TextureAssetManager;
-import com.mygdx.game.utils.TiledObjectUtil;
+import com.mygdx.game.utils.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static com.mygdx.game.controller.GameController.controller;
 import static com.mygdx.game.utils.Constants.PPM;
 
 
@@ -56,11 +57,12 @@ public class GameplayScreen implements Screen {
     private OrthogonalTiledMapRenderer tmr;
     private TiledMap map;
 
-    public static Joint grabFood;
+    public static boolean isMultiplayer;
+
 
     private Food food, food2;
 
-    public static Player player;
+    public static Player player, player2;
 
     public static ArrayList<Food> foods = new ArrayList<Food>();
     public static ArrayList<Food> foodsToBeAdded = new ArrayList<Food>();
@@ -71,15 +73,17 @@ public class GameplayScreen implements Screen {
     public static BitmapFont font;
 
     public static ArrayList<Body> toBeDeleted = new ArrayList<Body>();
-    public static boolean deleteJoint = false;
+    public static ArrayList<Joint> jointDeleted = new ArrayList<Joint>();
+
 
     public static FoodController foodController = new FoodController();
     public static TaskController taskController = new TaskController();
     public static GameController gameController;
     public static TextureAssetManager textureAssetManager;
 
-    public GameplayScreen(final Application app) {
+    public GameplayScreen(final Application app, boolean isMultiplayer) {
         this.app = app;
+        this.isMultiplayer = isMultiplayer;
 
 
         gameController = new GameController(app);
@@ -89,7 +93,11 @@ public class GameplayScreen implements Screen {
 
 
 
-//        Gdx.input.setInputProcessor(stageHUD);
+        Controller controller = Controllers.getControllers().first(); // Get the first controller
+        XboxControllerListener listener = new XboxControllerListener();
+        controller.addListener(listener);
+        System.out.println("Controller: " + controller.getName() + " is connected!");
+        Gdx.input.setInputProcessor(gameController.stageHUD);
 
         //GAME STUFF
         float w = Gdx.graphics.getWidth();
@@ -103,20 +111,26 @@ public class GameplayScreen implements Screen {
 
         world = new World(new Vector2(0, 0), false);
         b2dr = new Box2DDebugRenderer();
-        world.setContactListener(new CollisionListener());
 
-
+        if (isMultiplayer){
+            world.setContactListener(new CollisionListener2Player());
+        } else {
+            world.setContactListener(new CollisionListener());
+        }
 
 
         batch = new SpriteBatch();
         hudBatch = new SpriteBatch();
-//        texture = new Texture("download-compresskaru.com.png");
 
 //        map = new TmxMapLoader().load("map.tmx");
         map = new TmxMapLoader().load("map/OvertimeMap.tmx");
         tmr = new OrthogonalTiledMapRenderer(map);
 
-        player = new Player(world, map);
+        player = new Player(world, map, true);
+        if(isMultiplayer){
+            player2 = new Player(world, map, false);
+        }
+
         dropOff = new DropOff(world, map);
 
 //		Vector3 pos = camera.position;
@@ -156,11 +170,7 @@ public class GameplayScreen implements Screen {
 
         update(Gdx.graphics.getDeltaTime());
 
-        renderFood();
-        grabFood();
-        removeJoints();
-        removeFood();
-        destroyFood();
+
 
         //Render Assets
         // Render the game world
@@ -169,6 +179,9 @@ public class GameplayScreen implements Screen {
         // Render the player and foods
         batch.begin();
         player.draw(batch);
+        if(isMultiplayer){
+            player2.draw(batch);
+        }
 
         for (Food food : foods) {
             if (!food.isDeleted) {
@@ -203,6 +216,7 @@ public class GameplayScreen implements Screen {
             System.out.println("Time passed: " + gameController.timePassed);
             Gdx.app.exit();
         }
+
 
 //        super.render();
     }
@@ -242,56 +256,84 @@ public class GameplayScreen implements Screen {
     }
 
     public void grabFood(){
-//		if(player.interactedList.isEmpty()){
-//			if(!player.isGrabbing){
-//				if(grabFood != null) {
-//					world.destroyJoint(grabFood);
-//					grabFood = null;
-//				}
-//			}
-//			return;
-//		}
-
         if(!player.isGrabbing || player.interactedList.isEmpty()) {
-            return; // Don't grab the food if the player is not grabbing
+            return;
+        } else {
+            Body bodyA = player.body, bodyB = player.interactedList.get(0);
+            player.interactedFood = bodyB;
+            Vector2 worldCoordsAnchorPoint = bodyA.getWorldCenter();
+
+            if(player.facingDirection == FacingDirection.LEFT){
+                bodyB.setTransform(bodyA.getPosition().x - 0.5f , bodyA.getPosition().y, 0);
+            } else if(player.facingDirection == FacingDirection.RIGHT){
+                bodyB.setTransform(bodyA.getPosition().x + 0.5f , bodyA.getPosition().y, 0);
+            } else if(player.facingDirection == FacingDirection.UP){
+                bodyB.setTransform(bodyA.getPosition().x, bodyA.getPosition().y + 0.3f, 0);
+            } else if(player.facingDirection == FacingDirection.DOWN){
+                bodyB.setTransform(bodyA.getPosition().x, bodyA.getPosition().y - 0.3f, 0);
+            }
+
+            WeldJointDef weldJointDef = new WeldJointDef();
+            weldJointDef.bodyA = bodyA;
+            weldJointDef.bodyB = bodyB;
+            weldJointDef.localAnchorA.set(weldJointDef.bodyA.getLocalPoint(worldCoordsAnchorPoint));
+            weldJointDef.localAnchorB.set(weldJointDef.bodyB.getLocalPoint(worldCoordsAnchorPoint));
+            weldJointDef.referenceAngle = weldJointDef.bodyB.getAngle() - weldJointDef.bodyA.getAngle();
+
+            player.grabFood = world.createJoint(weldJointDef);
         }
 
-//		System.out.println("Grabbing food!");
 
-        Body bodyA = player.body, bodyB = player.interactedList.get(0);
+    }
 
-        player.interactedFood = bodyB;
+    public void grabFood2(){
+        if (isMultiplayer){
+            // For player2
+            if(!player2.isGrabbing || player2.interactedList.isEmpty()) {
+                return; // Don't grab the food if the player is not grabbing
+            }
 
-        // Set the anchor point to the center of the player's body
-        Vector2 worldCoordsAnchorPoint = bodyA.getWorldCenter();
+            Body bodyA2 = player2.body, bodyB2 = player2.interactedList.get(0);
+            player2.interactedFood = bodyB2;
+            Vector2 worldCoordsAnchorPoint2 = bodyA2.getWorldCenter();
 
-//		System.out.println(bodyA.getAngle());
-        if(player.facingDirection == FacingDirection.LEFT){
-            bodyB.setTransform(bodyA.getPosition().x - 0.5f , bodyA.getPosition().y, 0);
-        } else if(player.facingDirection == FacingDirection.RIGHT){
-            bodyB.setTransform(bodyA.getPosition().x + 0.5f , bodyA.getPosition().y, 0);
-        } else if(player.facingDirection == FacingDirection.UP){
-            bodyB.setTransform(bodyA.getPosition().x, bodyA.getPosition().y + 0.3f, 0);
-        } else if(player.facingDirection == FacingDirection.DOWN){
-            bodyB.setTransform(bodyA.getPosition().x, bodyA.getPosition().y - 0.3f, 0);
+            if(player2.facingDirection == FacingDirection.LEFT){
+                bodyB2.setTransform(bodyA2.getPosition().x - 0.5f , bodyA2.getPosition().y, 0);
+            } else if(player2.facingDirection == FacingDirection.RIGHT){
+                bodyB2.setTransform(bodyA2.getPosition().x + 0.5f , bodyA2.getPosition().y, 0);
+            } else if(player2.facingDirection == FacingDirection.UP){
+                bodyB2.setTransform(bodyA2.getPosition().x, bodyA2.getPosition().y + 0.3f, 0);
+            } else if(player2.facingDirection == FacingDirection.DOWN){
+                bodyB2.setTransform(bodyA2.getPosition().x, bodyA2.getPosition().y - 0.3f, 0);
+            }
+
+            WeldJointDef weldJointDef2 = new WeldJointDef();
+            weldJointDef2.bodyA = bodyA2;
+            weldJointDef2.bodyB = bodyB2;
+            weldJointDef2.localAnchorA.set(weldJointDef2.bodyA.getLocalPoint(worldCoordsAnchorPoint2));
+            weldJointDef2.localAnchorB.set(weldJointDef2.bodyB.getLocalPoint(worldCoordsAnchorPoint2));
+            weldJointDef2.referenceAngle = weldJointDef2.bodyB.getAngle() - weldJointDef2.bodyA.getAngle();
+
+            player2.grabFood = world.createJoint(weldJointDef2);
         }
-
-        WeldJointDef weldJointDef = new WeldJointDef();
-        weldJointDef.bodyA = bodyA;
-        weldJointDef.bodyB = bodyB;
-        weldJointDef.localAnchorA.set(weldJointDef.bodyA.getLocalPoint(worldCoordsAnchorPoint));
-        weldJointDef.localAnchorB.set(weldJointDef.bodyB.getLocalPoint(worldCoordsAnchorPoint));
-        weldJointDef.referenceAngle = weldJointDef.bodyB.getAngle() - weldJointDef.bodyA.getAngle();
-
-        grabFood = world.createJoint(weldJointDef);
     }
 
 
 
     public void update(float delta) {
         world.step(1/60f, 6, 2);
+        renderFood();
+        grabFood();
+        grabFood2();
+        removeJoints();
+//        destroyJoints();
+        removeFood();
+        destroyFood();
         gameController.stageHUD.act(delta);
         player.inputUpdate(delta);
+        if(isMultiplayer){
+            player2.inputUpdate(delta);
+        }
         cameraUpdate(delta);
 //		camera.update();
         tmr.setView(camera);
@@ -300,77 +342,30 @@ public class GameplayScreen implements Screen {
     }
 
     public void cameraUpdate(float delta) {
-        Vector3 pos = camera.position;
-        pos.x = player.body.getPosition().x * PPM;
-        pos.y = player.body.getPosition().y * PPM;
-        camera.position.set(pos);
+        if(!isMultiplayer){
+            Vector3 pos = camera.position;
+            pos.x = player.body.getPosition().x * PPM;
+            pos.y = player.body.getPosition().y * PPM;
+            camera.position.set(pos);
+            camera.zoom = 1f;
+        } else {
+            // Get the map's width and height in tiles
+            int mapWidthInTiles = map.getProperties().get("width", Integer.class);
+            int mapHeightInTiles = map.getProperties().get("height", Integer.class);
 
-//		// Get the map's width and height in tiles
-//		int mapWidthInTiles = map.getProperties().get("width", Integer.class);
-//		int mapHeightInTiles = map.getProperties().get("height", Integer.class);
-//
-//		// Get the tile size
-//		int tileSize = map.getProperties().get("tilewidth", Integer.class);
-//
-//		// Calculate the map's width and height in pixels
-//		float mapWidthInPixels = mapWidthInTiles * tileSize;
-//		float mapHeightInPixels = mapHeightInTiles * tileSize;
-//
-//		camera.position.set(mapWidthInPixels / 2, mapHeightInPixels / 2, 0);
-		camera.zoom = 1f;
+            // Get the tile size
+            int tileSize = map.getProperties().get("tilewidth", Integer.class);
+
+            // Calculate the map's width and height in pixels
+            float mapWidthInPixels = mapWidthInTiles * tileSize;
+            float mapHeightInPixels = mapHeightInTiles * tileSize;
+
+            camera.position.set(mapWidthInPixels / 2, mapHeightInPixels / 2, 0);
+            camera.zoom = 2f;
+        }
 
         camera.update();
     }
-
-    public Body createBox(int x, int y, int w, int h, boolean isStatic){
-        Body pBody;
-
-        BodyDef def = new BodyDef();
-        def.type = (isStatic) ? BodyDef.BodyType.StaticBody : BodyDef.BodyType.DynamicBody;
-        def.position.set(x / PPM, y / PPM);
-        def.fixedRotation = false;
-
-
-        PolygonShape shape = new PolygonShape();
-        shape.setAsBox( w / 2 / PPM,  h / 2 / PPM);
-
-        FixtureDef playerFixture = new FixtureDef();
-        playerFixture.shape = shape;
-        playerFixture.friction = 10f;
-        playerFixture.restitution = 0.0f;
-        playerFixture.density = 1f;
-
-        pBody = world.createBody(def);
-        pBody.createFixture(playerFixture).setUserData("Food");
-        shape.dispose();
-
-        return pBody;
-    }
-
-//	public Body createFood(int x, int y, int radius){
-//		Body pBody;
-//
-//		BodyDef def = new BodyDef();
-//		def.type = BodyType.DynamicBody;
-//		def.position.set(x / PPM, y / PPM);
-//		def.fixedRotation = false;
-//
-//		CircleShape shape = new CircleShape();
-//		shape.setRadius(radius / PPM);
-//
-//		FixtureDef playerFixture = new FixtureDef();
-////		playerFixture.shape = shape;
-//		playerFixture.shape = shape;
-//		playerFixture.friction = 10f;
-//		playerFixture.density = 10f;
-////		playerFixture.density = 1f;
-//
-//		pBody = world.createBody(def);
-//		pBody.createFixture(playerFixture).setUserData("Food");
-//		shape.dispose();
-//
-//		return pBody;
-//	}
 
     public static void generateFood(Rectangle body, String foodType, Texture texture){
         Gdx.app.log("Food", foodType + " generating...");
@@ -394,11 +389,16 @@ public class GameplayScreen implements Screen {
 
         for (Body body : toBeDeleted){
             if(!world.isLocked()){
-                System.out.println("Food: " + body + " is set to Inactive by the world!");
-                body.setActive(false);
+                for(Food foods : foods){
+                    if(foods.body == body){
+                        foods.isDeleted = true;
+                    }
+                }
 
                 System.out.println("Food: " + body + " is deleted by the world!");
                 world.destroyBody(body);
+
+
             }
         }
 
@@ -406,15 +406,48 @@ public class GameplayScreen implements Screen {
     }
 
     public static void removeJoints(){
-        if(deleteJoint && grabFood != null){
-            Gdx.app.debug("Joint", grabFood + " is deleted by the world");
-            System.out.println("Joint: " + grabFood + " is deleted by the world!");
-            if(!world.isLocked()){
-                world.destroyJoint(grabFood);
-                grabFood = null;
-                deleteJoint = false;
-            }
+        if(player.deleteJoint && player.grabFood != null){
+            System.out.println("Joint: 1" + player.grabFood + " is being deleted by the world!");
 
+            if(!world.isLocked() && player.grabFood != null){
+                System.out.println("Player 1 Joint trying to delete... with body" + player.body);
+                System.out.println("Player 2 pair with body" + player2.body);
+                Joint toBeDeleted = player.grabFood;
+                player.grabFood = null;
+                player.deleteJoint = false;
+                player.interactedFood = null;
+                player.interactedList.clear();
+                System.out.println("Joint 1: " + toBeDeleted + " is being deleted by the world!");
+                System.out.println(toBeDeleted.getBodyA() + " " + toBeDeleted.getBodyB());
+
+                if (toBeDeleted.getBodyA() != null && toBeDeleted.getBodyB() != null && toBeDeleted.getBodyA() == player.body && player.interactedFood == null && !world.isLocked()){
+                    System.out.println("Current interacted food: " + player.interactedFood);
+                    world.destroyJoint(toBeDeleted);
+                    System.out.println("Successfully Deleted Joint on Player 1! "  + toBeDeleted);
+                }
+            }
+        }
+
+        if(isMultiplayer){
+            if(player2.deleteJoint && player2.grabFood != null){
+                System.out.println("Joint 2: " + player2.grabFood + " is being deleted by the world!");
+
+                if(!world.isLocked() && player2.grabFood != null){
+                    System.out.println("Player 2 Joint trying to delete... with body" + player2.body);
+                    System.out.println("Player 1 pair with body" + player.body);
+                    Joint toBeDeleted = player2.grabFood;
+                    player2.grabFood = null;
+                    player2.deleteJoint = false;
+                    player2.interactedFood = null;
+                    player2.interactedList.clear();
+                    System.out.println("Joint 2: " + toBeDeleted + " is being deleted by the world!");
+                    System.out.println(toBeDeleted.getBodyA() + " " + toBeDeleted.getBodyB());
+                    if (toBeDeleted.getBodyA() != null && toBeDeleted.getBodyB() != null && toBeDeleted.getBodyA() == player2.body && player2.interactedFood == null && !world.isLocked()){
+                        System.out.println("Current interacted food: " + player2.interactedFood);
+                        world.destroyJoint(toBeDeleted);
+                    }
+                }
+            }
         }
     }
 
@@ -428,6 +461,7 @@ public class GameplayScreen implements Screen {
             }
         }
     }
+
 
 
 }

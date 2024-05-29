@@ -96,7 +96,7 @@ public class backup_mygdxgame extends Game {
         map = new TmxMapLoader().load("map/OvertimeMap.tmx");
         tmr = new OrthogonalTiledMapRenderer(map);
 
-        player = new Player(world, map);
+        player = new Player(world, map, true);
 
 
 //		Vector3 pos = camera.position;

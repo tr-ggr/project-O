@@ -2,6 +2,7 @@ package com.mygdx.game.model;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.controllers.Controllers;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
@@ -15,10 +16,13 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.mygdx.game.utils.ControllerState;
+import com.mygdx.game.utils.XboxMapping;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
+import static com.mygdx.game.controller.GameController.controller;
 import static com.mygdx.game.screens.GameplayScreen.*;
 import static com.mygdx.game.utils.Constants.PPM;
 
@@ -31,6 +35,7 @@ public class Player{
     public FacingDirection facingDirection = FacingDirection.RIGHT;
     public boolean isMoving = false;
     public ArrayList<Body> interactedList = new ArrayList<>();
+    public boolean isPlayer1;
 
     public int moveUp;
     public int moveDown;
@@ -39,6 +44,12 @@ public class Player{
 
     public int interact;
     public int grab;
+
+    public Joint grabFood;
+    public boolean deleteJoint = false;
+
+    private ControllerState grabState;
+    private ControllerState interactState;
 
     // The walk animations for each direction
     private Animation[] walkAnimations; // Must declare frame type (TextureRegion)
@@ -50,29 +61,54 @@ public class Player{
     float stateTime;
 
 
-    public Player(World world, TiledMap map){
+    public Player(World world, TiledMap map, boolean isPlayer1){
+        this.isPlayer1 = isPlayer1;
         createPlayer(map ,world);
         sprite = new Sprite(new Texture("serato-64x64.png"));
 //        sprite.setSize(64, 64);
 //        sprite.setOriginCenter();
 
 
-//
-//        moveUp = Input.Keys.UP;
-//        moveDown = Input.Keys.DOWN;
-//        moveRight = Input.Keys.RIGHT;
-//        moveLeft = Input.Keys.LEFT;
-//
-//        interact = Input.Keys.K;
-//        grab = Input.Keys.L;
+        if(isPlayer1) {
+            moveUp = Input.Keys.W;
+            moveDown = Input.Keys.S;
+            moveRight = Input.Keys.D;
+            moveLeft = Input.Keys.A;
 
-        moveUp = Input.Keys.W;
-        moveDown = Input.Keys.S;
-        moveRight = Input.Keys.D;
-        moveLeft = Input.Keys.A;
+            interact = Input.Keys.O;
+            grab = Input.Keys.P;
+        } else {
 
-        interact = Input.Keys.O;
-        grab = Input.Keys.P;
+//            moveUp = Input.Keys.UP;
+//            moveDown = Input.Keys.DOWN;
+//            moveRight = Input.Keys.RIGHT;
+//            moveLeft = Input.Keys.LEFT;
+//
+//            interact = Input.Keys.N;
+//            grab = Input.Keys.M;
+
+
+
+            moveUp = XboxMapping.DPAD_UP; // Assuming up is negative direction
+            moveDown = XboxMapping.DPAD_DOWN; // Assuming down is positive direction
+            moveRight = XboxMapping.DPAD_RIGHT; // Assuming right is positive direction
+            moveLeft = XboxMapping.DPAD_LEFT; // Assuming left is negative direction
+
+            interact = XboxMapping.BUTTON_LS;
+            grab = XboxMapping.BUTTON_RS;
+
+            grabState = new ControllerState(grab);
+            interactState = new ControllerState(interact);
+        }
+
+
+
+        if(isPlayer1){
+            System.out.println("Generated Player 1");
+        } else {
+            System.out.println("Generated Player 2");
+        }
+
 
 
         createPlayerWalkingAnimations();
@@ -153,106 +189,174 @@ public class Player{
 
         isMoving = false;
 
-        if (Gdx.input.isKeyPressed(moveLeft)) {
-            horizontalForce -= 1.5f;
-            body.setTransform(body.getPosition(), (float) Math.PI);
-            sprite.setRotation(180);
-            facingDirection = FacingDirection.LEFT;
-            isMoving = true;
-        }
-        if (Gdx.input.isKeyPressed(moveRight)) {
-            horizontalForce += 1.5f;
-            body.setTransform(body.getPosition(), 0f);
-            sprite.setRotation(0);
-            facingDirection = FacingDirection.RIGHT;
-            isMoving = true;
-        }
-        if (Gdx.input.isKeyPressed(moveUp)) {
-            verticalForce += 1.5f;
-            body.setTransform(body.getPosition(), (float) (Math.PI / 2));
-            sprite.setRotation(90);
-            facingDirection = FacingDirection.UP;
-            isMoving = true;
-        }
-        if (Gdx.input.isKeyPressed(moveDown)) {
-            verticalForce -= 1.5f;
-            body.setTransform(body.getPosition(), (float) (3 * Math.PI / 2));
-            sprite.setRotation(270);
-            facingDirection = FacingDirection.DOWN;
-            isMoving = true;
-        }
 
-
-
-        if (horizontalForce == 0 && verticalForce == 0) {
-            body.setLinearVelocity(0, 0);
-        } else {
-            body.setLinearVelocity(horizontalForce * 5, verticalForce * 5);
-        }
-
-        if (Gdx.input.isKeyJustPressed(grab)) {
-            if(isGrabbing){
-//                System.out.println("Not Grabbing!");
-                isGrabbing = false;
-                interactedFood = null;
-
-                interactedList.clear();
-                if (grabFood != null) {
-                    world.destroyJoint(grabFood);
-                    grabFood = null;
-                }
-            } else {
-                isGrabbing = true;
-//                System.out.println("Now grabbing!");
+        if(isPlayer1){
+            if (Gdx.input.isKeyPressed(moveLeft)) {
+                horizontalForce -= 1.5f;
+                body.setTransform(body.getPosition(), (float) Math.PI);
+                sprite.setRotation(180);
+                facingDirection = FacingDirection.LEFT;
+                isMoving = true;
             }
-        }
+            if (Gdx.input.isKeyPressed(moveRight)) {
+                horizontalForce += 1.5f;
+                body.setTransform(body.getPosition(), 0f);
+                sprite.setRotation(0);
+                facingDirection = FacingDirection.RIGHT;
+                isMoving = true;
+            }
+            if (Gdx.input.isKeyPressed(moveUp)) {
+                verticalForce += 1.5f;
+                body.setTransform(body.getPosition(), (float) (Math.PI / 2));
+                sprite.setRotation(90);
+                facingDirection = FacingDirection.UP;
+                isMoving = true;
+            }
+            if (Gdx.input.isKeyPressed(moveDown)) {
+                verticalForce -= 1.5f;
+                body.setTransform(body.getPosition(), (float) (3 * Math.PI / 2));
+                sprite.setRotation(270);
+                facingDirection = FacingDirection.DOWN;
+                isMoving = true;
+            }
 
 
-//        if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
-//            if (interactedFood == null) {
-//                System.out.println("No food");
-//                return;
-//            } else {
-////                for(Body b: interactedList ){
-////                    System.out.println(b);
-////                }
-//                System.out.println(interactedFood);
-//            }
-//        }
 
-//        if (Gdx.input.isKeyJustPressed(Input.Keys.X)) {
-//            System.out.println("Successfully dropped food!");
-//            isGrabbing = false;
-//            interactedFood = null;
-//
-//            interactedList.clear();
-//            if (grabFood != null) {
-//                world.destroyJoint(grabFood);
-//                grabFood = null;
-//            }d
-//        }
-
-
-        if (Gdx.input.isKeyJustPressed(interact)) {
-            if (interactedFixture == null) {
-//                System.out.println("No interaction");
-            } else if (Objects.equals(interactedFixture.getUserData(), null)) {
-//                System.out.println("Interacted with " + interactedFixture.getUserData());
+            if (horizontalForce == 0 && verticalForce == 0) {
+                body.setLinearVelocity(0, 0);
             } else {
-                for (Task task : taskController.getTasks()) {
-                    if (Objects.equals(interactedFixture.getUserData(), task.name)) {
-                        if(task.isEnabled){
-//                            System.out.println("Interacted with " + interactedFixture.getUserData());
-                            task.interactTimer();
-                            break;
-                        } else {
-//                            System.out.println("Task is not enabled!");
-                        }
+                body.setLinearVelocity(horizontalForce * 5, verticalForce * 5);
+            }
 
+            if (Gdx.input.isKeyJustPressed(grab)) {
+                if(isGrabbing){
+                    System.out.println("Not Grabbing!");
+                    isGrabbing = false;
+                    interactedFood = null;
+
+                    interactedList.clear();
+                    if (grabFood != null) {
+//                    world.destroyJoint(grabFood);
+//                    jointDeleted.add(grabFood);
+//                    grabFood = null;
+                        deleteJoint = true;
+                    }
+                } else {
+                    isGrabbing = true;
+                    System.out.println("Now grabbing!");
+                }
+            }
+
+
+
+            if (Gdx.input.isKeyJustPressed(interact)) {
+                if (interactedFixture == null) {
+//                System.out.println("No interaction");
+                } else if (Objects.equals(interactedFixture.getUserData(), null)) {
+//                System.out.println("Interacted with " + interactedFixture.getUserData());
+                } else {
+                    for (Task task : taskController.getTasks()) {
+                        if (Objects.equals(interactedFixture.getUserData(), task.name)) {
+                            if(task.isEnabled){
+//                            System.out.println("Interacted with " + interactedFixture.getUserData());
+                                task.interactTimer();
+                                break;
+                            } else {
+//                            System.out.println("Task is not enabled!");
+                            }
+
+                        }
                     }
                 }
+
             }
 
+        } else {
+            if (Controllers.getCurrent().getButton(XboxMapping.DPAD_LEFT)) {
+                horizontalForce -= 1.5f;
+                body.setTransform(body.getPosition(), (float) Math.PI);
+                sprite.setRotation(180);
+                facingDirection = FacingDirection.LEFT;
+                isMoving = true;
+            }
+            if (Controllers.getCurrent().getButton(XboxMapping.DPAD_RIGHT)) {
+                horizontalForce += 1.5f;
+                body.setTransform(body.getPosition(), 0f);
+                sprite.setRotation(0);
+                facingDirection = FacingDirection.RIGHT;
+                isMoving = true;
+            }
+            if (Controllers.getCurrent().getButton(XboxMapping.DPAD_UP)) {
+                verticalForce += 1.5f;
+                body.setTransform(body.getPosition(), (float) (Math.PI / 2));
+                sprite.setRotation(90);
+                facingDirection = FacingDirection.UP;
+                isMoving = true;
+            }
+            if (Controllers.getCurrent().getButton(XboxMapping.DPAD_DOWN)) {
+                verticalForce -= 1.5f;
+                body.setTransform(body.getPosition(), (float) (3 * Math.PI / 2));
+                sprite.setRotation(270);
+                facingDirection = FacingDirection.DOWN;
+                isMoving = true;
+            }
+
+
+
+            if (horizontalForce == 0 && verticalForce == 0) {
+                body.setLinearVelocity(0, 0);
+            } else {
+                body.setLinearVelocity(horizontalForce * 5, verticalForce * 5);
+            }
+
+            if (grabState.isJustPressed()) {
+                if(isGrabbing){
+                    System.out.println("Not Grabbing!");
+                    isGrabbing = false;
+                    interactedFood = null;
+
+                    interactedList.clear();
+                    if (grabFood != null) {
+//                    world.destroyJoint(grabFood);
+//                    jointDeleted.add(grabFood);
+//                    grabFood = null;
+                        deleteJoint = true;
+                    }
+                } else {
+                    isGrabbing = true;
+                    System.out.println("Now grabbing!");
+                }
+            }
+
+
+
+            if (Controllers.getCurrent().getButton(interact)) {
+                if (interactedFixture == null) {
+//                System.out.println("No interaction");
+                } else if (Objects.equals(interactedFixture.getUserData(), null)) {
+//                System.out.println("Interacted with " + interactedFixture.getUserData());
+                } else {
+                    for (Task task : taskController.getTasks()) {
+                        if (Objects.equals(interactedFixture.getUserData(), task.name)) {
+                            if(task.isEnabled){
+//                            System.out.println("Interacted with " + interactedFixture.getUserData());
+                                task.interactTimer();
+                                break;
+                            } else {
+//                            System.out.println("Task is not enabled!");
+                            }
+
+                        }
+                    }
+                }
+
+            }
+
+        }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.Z)){
+            System.out.println("Player 1 interacted food: " + player.interactedFood);
+            System.out.println("Player 2 interacted food: " + player2.interactedFood);
         }
     }
 
@@ -270,7 +374,12 @@ public class Player{
         playerFixture.density = 1.0f;
 
         this.body = world.createBody(def);
-        this.body.createFixture(playerFixture).setUserData("Player");
+
+        if(isPlayer1){
+            this.body.createFixture(playerFixture).setUserData("Player1");
+        } else {
+            this.body.createFixture(playerFixture).setUserData("Player2");
+        }
     }
 
     private void createPlayer(TiledMap map, World world) {

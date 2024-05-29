@@ -12,6 +12,7 @@ public class FoodController {
         foodList.add("Booklet");
         foodList.add("MoM");
         foodList.add("Paper");
+        foodList.add("GradedPaper");
     }
 
     public boolean isFood(String food){

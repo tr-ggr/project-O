@@ -17,24 +17,24 @@ public class CollisionListener implements ContactListener {
 
         player.interactedFixture = fB;
 
-//        System.out.println(fA + " Collides with " + fB);
-//        System.out.println(fA.getUserData() + " Collides with " + fB.getUserData());
+        System.out.println(fA + " Collides with " + fB);
+        System.out.println(fA.getUserData() + " Collides with " + fB.getUserData());
 
         checkFixtures(fA, fB);
         checkFixtures(fB, fA);
 
         // If the interactedList is not empty or the fixture is null or its userData is null, return
-        if (Objects.equals(fB.getUserData(), null) || grabFood != null) {
+        if (Objects.equals(fB.getUserData(), null) || player.grabFood != null) {
 //            System.out.println("Hands is full!");
             if (Objects.equals(fA.getUserData(), "Sensor") && gameController.checkRequirements((String) fB.getUserData())) {
 //                System.out.println("Food dropped to sensor!");
-                deleteJoint = true;
+                player.deleteJoint = true;
                 toBeDeleted.add(fB.getBody());
             }
         } else if (Objects.equals(fA.getUserData(), "Sensor") && gameController.checkRequirements((String) fB.getUserData())) {
 //            System.out.println("Food dropped to sensor!");
             toBeDeleted.add(fB.getBody());
-        } else if (foodController.isFood((String) fB.getUserData()) && Objects.equals(fA.getUserData(), "Player")) {
+        } else if (foodController.isFood((String) fB.getUserData()) && Objects.equals(fA.getUserData(), "Player1")) {
 //            System.out.println("Interacted with " + fB.getUserData() + "with body: " + fB.getBody());
 //            System.out.println("Added to list!");
             player.interactedList.add(fB.getBody());
@@ -76,7 +76,7 @@ public class CollisionListener implements ContactListener {
                 if (Objects.equals(fixture2.getUserData().toString(), task.name)) {
                     if (Objects.equals(fixture1.getUserData().toString(), task.key) && !task.isEnabled) {
 //                        System.out.println("Key in successful with " + task.key + "!");
-                        deleteJoint = true;
+                        player.deleteJoint = true;
                         toBeDeleted.add(fixture1.getBody());
                         task.isEnabled = true;
                         break;

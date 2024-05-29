@@ -29,12 +29,6 @@ public class Food {
     }
 
     public void draw(Batch batch){
-        System.out.println("Drawing " + body + " to the world...");
-        if(!body.isActive()){
-            System.out.println("Body is null");
-            isDeleted = true;
-            return;
-        }
         sprite.setPosition(body.getPosition().x * PPM - sprite.getWidth() / 2, body.getPosition().y * PPM - sprite.getHeight() / 2);
         sprite.draw(batch);
     }
@@ -52,7 +46,6 @@ public class Food {
 
 
     public Body createBox(int x, int y, int w, int h, boolean isStatic){
-        assert (world.isLocked() == false);
         if (world.isLocked()) {
             return null;
         }
@@ -84,6 +77,8 @@ public class Food {
         shape.dispose();
 
         pBody.setActive(true);
+
+        pBody.setUserData(this);
 
         return pBody;
     }

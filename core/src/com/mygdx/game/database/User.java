@@ -49,4 +49,14 @@ public class User{
         return money;
     }
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + userID +
+                ", username='" + username + '\'' +
+                ", highscore=" + highscore +
+                ", money=" + money +
+                '}';
+    }
+
 }

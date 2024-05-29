@@ -11,7 +11,7 @@ public class DatabaseHelper {
 
     private DatabaseHelper(){
         try(Connection c = MySQLConnection.getConnection();
-        Statement s = c.createStatement()) {
+            Statement s = c.createStatement()) {
             String table = "CREATE TABLE IF NOT EXISTS tblUser (" +
                     "userID INT PRIMARY KEY AUTO_INCREMENT," +
                     "username VARCHAR(256) UNIQUE," +
@@ -36,7 +36,7 @@ public class DatabaseHelper {
 
     public boolean register(String username, String password){
         try(Connection c = MySQLConnection.getConnection();
-            PreparedStatement checkUser = c.prepareStatement("SELECT * FROM tblUser WHERE name = ?")
+            PreparedStatement checkUser = c.prepareStatement("SELECT * FROM tblUser WHERE username = ?")
         ) {
             System.out.println(username + " " + password + " " );
 
@@ -65,7 +65,7 @@ public class DatabaseHelper {
                 Connection c = MySQLConnection.getConnection();
                 Statement s = c.createStatement();
         ) {
-            String query = "SELECT * FROM tblUser WHERE name = '" + username + "' AND password = '" + password + "'";
+            String query = "SELECT * FROM tblUser WHERE username = '" + username + "' AND password = '" + password + "'";
 
             ResultSet resultset = s.executeQuery(query);
             if (resultset.next() ) {
@@ -88,7 +88,7 @@ public class DatabaseHelper {
 
     public ArrayList<User> TopUsers(){
         ArrayList<User> users = new ArrayList<>();
-        String sql = "SELECT username, highscore FROM tbluser ORDER BY score DESC LIMIT 5";
+        String sql = "SELECT * FROM tbluser ORDER BY highscore DESC LIMIT 5";
 
         try (Connection c = MySQLConnection.getConnection();
              PreparedStatement s = c.prepareStatement(sql)) {

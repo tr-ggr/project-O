@@ -142,6 +142,7 @@ public class CollisionListener2Player implements ContactListener {
                             toBeDeleted.add(fixture1.getBody());
                             task.isEnabled = true;
                             player.interactedFood = null;
+                            player.isGrabbing = false;
                             return;
                         } else {
                             System.out.println("Key in failed with " + task.key + "!");
@@ -164,6 +165,7 @@ public class CollisionListener2Player implements ContactListener {
                             toBeDeleted.add(fixture1.getBody());
                             task.isEnabled = true;
                             player2.interactedFood = null;
+                            player2.isGrabbing = false;
                             break;
                         } else {
                             System.out.println("Key in failed with " + task.key + "!");

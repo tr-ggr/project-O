@@ -34,6 +34,9 @@ public class TextureAssetManager {
         textures.put("PaperSB", new Texture("taskAsset/PaperSB.png"));
         textures.put("BookletSB", new Texture("taskAsset/BookletSB.png"));
 
+        //background-ui
+        textures.put("background", new Texture("background/bg.png"));
+
 
         createCountdownAnimations();
     }

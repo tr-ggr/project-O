@@ -75,7 +75,11 @@ com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	}
 	year199x: {
 		font: year199x
-	}
+	},
+	year199x_black: {
+		font: year199x,
+		fontColor: black
+	},
 	giygas: {
 		font: giygas
 	}

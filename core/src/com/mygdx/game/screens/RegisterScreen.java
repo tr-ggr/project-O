@@ -22,7 +22,7 @@ import com.mygdx.game.Application;
 import com.mygdx.game.screenutils.ParallaxBackground;
 import com.mygdx.game.utils.TextureAssetManager;
 
-public class LoginScreen implements Screen {
+public class RegisterScreen implements Screen {
     private final Application app;
     private Stage stage;
     private Skin skin;
@@ -36,7 +36,7 @@ public class LoginScreen implements Screen {
 
     private boolean isTransitioning;
 
-    public LoginScreen(final Application app) {
+    public RegisterScreen(final Application app) {
         this.app = app;
 
         this.isTransitioning = true;
@@ -78,7 +78,7 @@ public class LoginScreen implements Screen {
         table.add(formsTable).expand().right().padRight(150).width(500).padTop(200);
 
         formsTable.row();
-        Label titleLabel = new Label("LOGIN", app.skin, "year199x_black");
+        Label titleLabel = new Label("REGISTER", app.skin, "year199x_black");
         titleLabel.setFontScale(3f);
         formsTable.add(titleLabel).padBottom(50).colspan(2);
 
@@ -107,24 +107,16 @@ public class LoginScreen implements Screen {
         submit = new TextButton("Submit", app.levelskin, "c3");
         formsTable.add(submit).height(50).fill();
 
-        TextButton register = new TextButton("Register", app.levelskin);
-        formsTable.add(register).height(50).fill();
+        TextButton login = new TextButton("Login", app.levelskin);
+        formsTable.add(login).height(50).fill();
 
 
-        register.addListener(new ChangeListener() {
+        login.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-//                stage.addAction(Actions.sequence(Actions.fadeOut(0.5f), Actions.run(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                    }
-//                })));
-                app.setScreen(new RegisterScreen(app));
+                app.setScreen(new LoginScreen(app));
             }
         });
-
-        root.pack();
 
 
 

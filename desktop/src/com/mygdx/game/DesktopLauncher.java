@@ -2,7 +2,10 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import com.mygdx.game.database.DatabaseHelper;
 import com.mygdx.game.screens.LoginScreen;
+
+import javax.xml.crypto.Data;
 
 // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 public class DesktopLauncher {
@@ -13,6 +16,8 @@ public class DesktopLauncher {
 //		config.setFullscreenMode(Lwjgl3ApplicationConfiguration.getDisplayMode());
 //		config.setResizable(false);
 //		config.setWindowSizeLimits(1920, 1080, 1920, 1080);
+
+		DatabaseHelper databaseHelper = DatabaseHelper.getInstance();
 		new Lwjgl3Application(new Application(), config);
 	}
 }

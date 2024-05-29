@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
+import static com.mygdx.game.Application.*;
 import static com.mygdx.game.screens.GameplayScreen.player;
 import static com.mygdx.game.screens.GameplayScreen.player2;
 
@@ -69,7 +70,6 @@ public class GameController {
 
     private Music dean_spawn;
 
-    private Music background_music;
 
     public static Controller controller;
 
@@ -79,7 +79,6 @@ public class GameController {
         this.stageHUD = new Stage(new StretchViewport(Application.V_WIDTH, Application.V_HEIGHT , app.camera));
 
         dean_spawn = Gdx.audio.newMusic(Gdx.files.internal("sfx/dean_spawn.mp3"));
-        background_music = Gdx.audio.newMusic(Gdx.files.internal("music/theme-song.mp3"));
 
         cherryUI = new CherryUI();
         cherryUI.setVisible(false);
@@ -102,16 +101,8 @@ public class GameController {
 
 //        stageHUD.setDebugAll(true);
 
-        background_music.play();
-        background_music.setLooping(true);
-        background_music.setVolume(0.1f);
 
         dean_spawn.setVolume(2f);
-
-
-
-
-
     }
 
     public void generateNPC(){
@@ -132,6 +123,7 @@ public class GameController {
         if(Gdx.input.isKeyPressed(Input.Keys.SPACE)){
             if(!hasCherry){
                 dean_spawn.play();
+                fadeMusic(bgm_game, bgm_dean);
                 Cherry = new NPC("Cherry", 40, 3);
                 System.out.println("Generated Ma'am Dean NPC!");
                 hasCherry = true;
@@ -157,6 +149,7 @@ public class GameController {
                 cherryUI.setCherry(Cherry);
                 cherryUI.setVisible(true);
                 dean_spawn.play();
+                fadeMusic(bgm_game, bgm_dean);
             } else {
 //                System.out.println("Generated a normal NPC!");
                 curr = new NPC(npcs.size() + 1 + "", 25, 1);
@@ -180,6 +173,7 @@ public class GameController {
                 cherryUI.setCherry(Cherry);
                 cherryUI.setVisible(true);
                 dean_spawn.play();
+                fadeMusic(bgm_game, bgm_dean);
             } else {
 //                System.out.println("Generated a normal NPC!");
                 curr = new NPC(npcs.size() + 1 + "", 25, 1);
@@ -251,6 +245,7 @@ public class GameController {
             hasCherry = false;
             cherryUI.setVisible(false);
             lives--;
+            fadeMusic(bgm_dean, bgm_game);
         }
     }
 
@@ -270,9 +265,11 @@ public class GameController {
 
         if(hasCherry && Cherry.checkRequirements(food)){
             moneyEarned += (Math.round(5 * (Cherry.currentTime / Cherry.maxTime) ) * phaseMultiplier);
+            sfx_points.play();
             if(Cherry.getRequirements().isEmpty()){
                 hasCherry = false;
                 cherryUI.setVisible(false);
+                fadeMusic(bgm_dean, bgm_game);
             }
             return true;
         }
@@ -281,6 +278,7 @@ public class GameController {
             NPC npc = it.next();
             if(npc.checkRequirements(food)){
                 moneyEarned += (Math.round( 5 * (npc.currentTime / npc.maxTime) ) * phaseMultiplier);
+                sfx_points.play();
                 if(npc.getRequirements().isEmpty()){
                     removeActor(flexBox, npcs.indexOf(npc));
                     it.remove();

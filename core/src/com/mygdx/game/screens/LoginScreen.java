@@ -19,6 +19,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.mygdx.game.Application;
+import com.mygdx.game.actor.DialogTrial;
+import com.mygdx.game.database.CurrentUser;
+import com.mygdx.game.database.DatabaseHelper;
+import com.mygdx.game.database.User;
 import com.mygdx.game.screenutils.ParallaxBackground;
 import com.mygdx.game.utils.TextureAssetManager;
 
@@ -110,6 +114,21 @@ public class LoginScreen implements Screen {
         TextButton register = new TextButton("Register", app.levelskin);
         formsTable.add(register).height(50).fill();
 
+
+        submit.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+               DatabaseHelper db = DatabaseHelper.getInstance();
+               User user = db.login(usernameField.getText(), passwordField.getText());
+               if(user != null) {
+                   CurrentUser.getInstance().setUser(user);
+                   app.setScreen(new MenuScreen(app));
+               } else {
+                   stage.addActor(new DialogTrial(stage, "Error", "Invalid username or password"));
+               }
+
+            }
+        });
 
         register.addListener(new ChangeListener() {
             @Override

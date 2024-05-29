@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.Rectangle;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import static com.mygdx.game.Application.sfx_drop;
 import static com.mygdx.game.screens.GameplayScreen.*;
 import static com.mygdx.game.utils.Constants.PPM;
 import static java.lang.Thread.sleep;
@@ -153,6 +154,7 @@ public class Task implements PropertyChangeListener {
             System.out.println("Task " + name + " is done!");
             generateFood(body, foodName, textureAssetManager.getTexture(foodName));
             System.out.println("Successfully generated food!");
+
             if(key != null) isEnabled = false;
         }
     }

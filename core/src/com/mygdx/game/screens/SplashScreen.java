@@ -20,6 +20,8 @@ import com.mygdx.game.actor.TaskCard;
 import com.mygdx.game.screenutils.ParallaxBackground;
 import com.mygdx.game.utils.TextureAssetManager;
 
+import static com.mygdx.game.Application.bgm_game;
+
 public class SplashScreen implements Screen {
     private final Application app;
 
@@ -44,7 +46,6 @@ public class SplashScreen implements Screen {
 
     public SplashScreen(final Application app) {
         this.app = app;
-
 
         stage = new Stage(new StretchViewport(Application.V_WIDTH, Application.V_HEIGHT, app.camera));
 

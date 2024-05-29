@@ -18,6 +18,7 @@ public class DatabaseHelper {
                     "password VARCHAR(256) NOT NULL, " +
                     "highscore INT(255) NOT NULL, " +
                     "money INT(255) NOT NULL)";
+
             s.execute(table);
 
         } catch (Exception e) {

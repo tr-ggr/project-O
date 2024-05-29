@@ -5,6 +5,8 @@ package com.mygdx.game.model;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
+import static com.mygdx.game.Application.sfx_drop;
+
 public class TaskTimer implements Runnable{
     private final int time;
     public boolean isPaused = false;
@@ -48,6 +50,7 @@ public class TaskTimer implements Runnable{
         }
 //        System.out.println("Task completed!");
         // Notify observers that the task is completed
+
         support.firePropertyChange("completed", null, this);
     }
 

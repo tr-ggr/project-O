@@ -25,6 +25,8 @@ import com.mygdx.game.controller.FoodController;
 import com.mygdx.game.controller.GameController;
 import com.mygdx.game.controller.TaskController;
 import com.mygdx.game.controller.XboxControllerListener;
+import com.mygdx.game.database.CurrentUser;
+import com.mygdx.game.database.DatabaseHelper;
 import com.mygdx.game.model.*;
 import com.mygdx.game.utils.*;
 
@@ -40,6 +42,8 @@ public class GameplayScreen implements Screen {
     private final Application app;
 
     private Image hudImage;
+
+    private boolean isTransitioning;
 
     //GAME STUFF
     private boolean DEBUG = false;
@@ -93,10 +97,11 @@ public class GameplayScreen implements Screen {
 
 
 
-        Controller controller = Controllers.getControllers().first(); // Get the first controller
-        XboxControllerListener listener = new XboxControllerListener();
-        controller.addListener(listener);
-        System.out.println("Controller: " + controller.getName() + " is connected!");
+//        Controller controller = Controllers.getControllers().first(); // Get the first controller
+//        XboxControllerListener listener = new XboxControllerListener();
+//        controller.addListener(listener);
+
+//        System.out.println("Controller: " + controller.getName() + " is connected!");
         Gdx.input.setInputProcessor(gameController.stageHUD);
 
         //GAME STUFF
@@ -158,9 +163,15 @@ public class GameplayScreen implements Screen {
     @Override
     public void render(float v) {
         // Clear the screen
-        Gdx.gl.glClearColor(.25f, .25f, .25f, 1f);
+        Gdx.gl.glClearColor(1f, 1f, 1f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        if(isTransitioning){
+            if (gameController.stageHUD.getRoot().getColor().a >= 1){
+                isTransitioning = false;
+            }
+            gameController.stageHUD.getRoot().getColor().a += v;
+        }
 
 
 //        b2dr.render(world, camera.combined.scl(PPM));
@@ -214,7 +225,10 @@ public class GameplayScreen implements Screen {
             System.out.println("Game Over!");
             System.out.println("Money earned: " + gameController.moneyEarned);
             System.out.println("Time passed: " + gameController.timePassed);
-            Gdx.app.exit();
+
+
+
+            app.setScreen(new GameOverScreen(app, (int)gameController.timePassed, gameController.moneyEarned));
         }
 
 
@@ -410,7 +424,7 @@ public class GameplayScreen implements Screen {
 
             if(!world.isLocked() && player.grabFood != null){
                 System.out.println("Player 1 Joint trying to delete... with body" + player.body);
-                System.out.println("Player 2 pair with body" + player2.body);
+                if(isMultiplayer) System.out.println("Player 2 pair with body" + player2.body);
                 Joint toBeDeleted = player.grabFood;
                 player.grabFood = null;
                 player.deleteJoint = false;

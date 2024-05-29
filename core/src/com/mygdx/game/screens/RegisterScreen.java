@@ -18,7 +18,11 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.kotcrab.vis.ui.VisUI;
+import com.kotcrab.vis.ui.util.dialog.Dialogs;
 import com.mygdx.game.Application;
+import com.mygdx.game.actor.DialogTrial;
+import com.mygdx.game.database.DatabaseHelper;
 import com.mygdx.game.screenutils.ParallaxBackground;
 import com.mygdx.game.utils.TextureAssetManager;
 
@@ -38,6 +42,8 @@ public class RegisterScreen implements Screen {
 
     public RegisterScreen(final Application app) {
         this.app = app;
+
+        VisUI.load();
 
         this.isTransitioning = true;
 
@@ -110,6 +116,19 @@ public class RegisterScreen implements Screen {
         TextButton login = new TextButton("Login", app.levelskin);
         formsTable.add(login).height(50).fill();
 
+        submit.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                DatabaseHelper db = DatabaseHelper.getInstance();
+                if(db.register(usernameField.getText(), passwordField.getText())){
+                    stage.addActor(new DialogTrial(stage, "Success", "Successfully Registered!"));
+                } else {
+                    stage.addActor(new DialogTrial(stage, "Failed", "Register Failed!"));
+                }
+
+            }
+        });
+
 
         login.addListener(new ChangeListener() {
             @Override
@@ -171,12 +190,12 @@ public class RegisterScreen implements Screen {
     @Override
     public void hide() {
 
-
     }
 
     @Override
     public void dispose() {
         app.dispose();
         stage.dispose();
+        VisUI.dispose();
     }
 }

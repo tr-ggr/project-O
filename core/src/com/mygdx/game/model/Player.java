@@ -36,6 +36,7 @@ public class Player{
     public boolean isMoving = false;
     public ArrayList<Body> interactedList = new ArrayList<>();
     public boolean isPlayer1;
+    public boolean hasController;
 
     public int moveUp;
     public int moveDown;
@@ -63,6 +64,7 @@ public class Player{
 
     public Player(World world, TiledMap map, boolean isPlayer1){
         this.isPlayer1 = isPlayer1;
+
         createPlayer(map ,world);
         sprite = new Sprite(new Texture("serato-64x64.png"));
 //        sprite.setSize(64, 64);
@@ -79,26 +81,34 @@ public class Player{
             grab = Input.Keys.P;
         } else {
 
-//            moveUp = Input.Keys.UP;
-//            moveDown = Input.Keys.DOWN;
-//            moveRight = Input.Keys.RIGHT;
-//            moveLeft = Input.Keys.LEFT;
-//
-//            interact = Input.Keys.N;
-//            grab = Input.Keys.M;
+            if(Controllers.getControllers().size == 0){
+                System.out.println("No controllers connected!");
+                moveUp = Input.Keys.UP;
+                moveDown = Input.Keys.DOWN;
+                moveRight = Input.Keys.RIGHT;
+                moveLeft = Input.Keys.LEFT;
+
+                interact = Input.Keys.N;
+                grab = Input.Keys.M;
+                this.hasController = false;
+            } else {
+                System.out.println("Controllers connected: " + Controllers.getControllers().size);
+
+                moveUp = XboxMapping.DPAD_UP; // Assuming up is negative direction
+                moveDown = XboxMapping.DPAD_DOWN; // Assuming down is positive direction
+                moveRight = XboxMapping.DPAD_RIGHT; // Assuming right is positive direction
+                moveLeft = XboxMapping.DPAD_LEFT; // Assuming left is negative direction
+
+                interact = XboxMapping.BUTTON_LS;
+                grab = XboxMapping.BUTTON_RS;
+
+                grabState = new ControllerState(grab);
+                interactState = new ControllerState(interact);
+
+                this.hasController = true;
+            }
 
 
-
-            moveUp = XboxMapping.DPAD_UP; // Assuming up is negative direction
-            moveDown = XboxMapping.DPAD_DOWN; // Assuming down is positive direction
-            moveRight = XboxMapping.DPAD_RIGHT; // Assuming right is positive direction
-            moveLeft = XboxMapping.DPAD_LEFT; // Assuming left is negative direction
-
-            interact = XboxMapping.BUTTON_LS;
-            grab = XboxMapping.BUTTON_RS;
-
-            grabState = new ControllerState(grab);
-            interactState = new ControllerState(interact);
         }
 
 
@@ -123,7 +133,11 @@ public class Player{
         int[] startCols = {0, 4, 8, 12}; // Replace with your start columns for each direction
         int[] endCols = {3, 7, 11, 15}; // Replace with your end columns for each direction
 
-        walkSheet = new Texture(Gdx.files.internal("sheets/serato_spritesheet_64x64.png"));
+        if(isPlayer1){
+            walkSheet = new Texture(Gdx.files.internal("sheets/serato_spritesheet_64x64.png"));
+        }else {
+            walkSheet = new Texture(Gdx.files.internal("sheets/godinez_spritesheet.png"));
+        }
         TextureRegion[][] tmp = TextureRegion.split(walkSheet, walkSheet.getWidth() / FRAME_COLS, walkSheet.getHeight() / FRAME_ROWS);
 
         // Create the walkAnimations array
@@ -157,7 +171,14 @@ public class Player{
         int[] startCols = {0, 4, 8, 12}; // Replace with your start columns for each direction
         int[] endCols = {3, 7, 11, 15}; // Replace with your end columns for each direction
 
-        walkSheet = new Texture(Gdx.files.internal("sheets/serato_spritesheet_grabbing_64x64.png"));
+
+
+        if(isPlayer1){
+            walkSheet = new Texture(Gdx.files.internal("sheets/serato_spritesheet_grabbing_64x64.png"));
+        }else {
+            walkSheet = new Texture(Gdx.files.internal("sheets/godinez_spritesheet_grabbing.png"));
+        }
+
         TextureRegion[][] tmp = TextureRegion.split(walkSheet, walkSheet.getWidth() / FRAME_COLS, walkSheet.getHeight() / FRAME_ROWS);
 
         // Create the walkAnimations array
@@ -190,7 +211,7 @@ public class Player{
         isMoving = false;
 
 
-        if(isPlayer1){
+        if(!hasController){
             if (Gdx.input.isKeyPressed(moveLeft)) {
                 horizontalForce -= 1.5f;
                 body.setTransform(body.getPosition(), (float) Math.PI);

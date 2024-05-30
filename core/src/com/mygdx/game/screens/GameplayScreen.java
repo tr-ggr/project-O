@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static com.mygdx.game.Application.*;
 import static com.mygdx.game.controller.GameController.controller;
 import static com.mygdx.game.utils.Constants.PPM;
 
@@ -163,7 +164,7 @@ public class GameplayScreen implements Screen {
     @Override
     public void render(float v) {
         // Clear the screen
-        Gdx.gl.glClearColor(1f, 1f, 1f, 1f);
+        Gdx.gl.glClearColor(0.5f, 0.5f, 0.5f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         if(isTransitioning){
@@ -226,7 +227,13 @@ public class GameplayScreen implements Screen {
             System.out.println("Money earned: " + gameController.moneyEarned);
             System.out.println("Time passed: " + gameController.timePassed);
 
-
+            if(bgm_bloodMoon.isPlaying()){
+                fadeMusic(bgm_bloodMoon, bgm_intro);
+            } else if(bgm_dean.isPlaying()){
+                fadeMusic(bgm_dean, bgm_intro);
+            } else if(bgm_game.isPlaying()){
+                fadeMusic(bgm_game, bgm_intro);
+            }
 
             app.setScreen(new GameOverScreen(app, (int)gameController.timePassed, gameController.moneyEarned));
         }

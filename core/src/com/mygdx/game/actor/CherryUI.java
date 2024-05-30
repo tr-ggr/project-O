@@ -17,6 +17,8 @@ public class CherryUI extends Table {
     Skin progressskin;
     Skin skin;
 
+    public boolean isBloodMoon = false;
+
     public CherryUI () {
         progressskin = new Skin(Gdx.files.internal("shadeui/uiskin.json"));
         skin = new Skin(Gdx.files.internal("skin/terra-mother-ui.json"));
@@ -41,16 +43,22 @@ public class CherryUI extends Table {
             this.add(progressBar).fill().padLeft(100).padRight(100).colspan(cherry.getRequirements().size()).expandY();
 
             this.row();
-            this.add(new Image(new Texture("Cherry.png"))).size(600,600).expand().left().bottom().colspan(cherry.getRequirements().size());
+            if(isBloodMoon) {
+                this.add(new Image(new Texture("DeanRed3.png"))).size(600,600).expand().left().bottom().colspan(cherry.getRequirements().size());
+            } else {
+                this.add(new Image(new Texture("Cherry.png"))).size(600, 600).expand().left().bottom().colspan(cherry.getRequirements().size());
+            }
         }
 
         progressBar.setValue(cherry.getCurrentTime());
     }
 
-    public void setCherry(NPC cherry) {
+    public void setCherry(NPC cherry, boolean isBloodMoon) {
+
         // Set the CherryUI's cherry
         // Create a new CherryUI
         this.cherry = cherry;
+        this.isBloodMoon = isBloodMoon;
         size = cherry.getRequirements().size();
 
         progressBar = new ProgressBar(0, 40f, 1f, false, progressskin);
@@ -66,8 +74,11 @@ public class CherryUI extends Table {
         this.add(progressBar).fill().padLeft(100).padRight(100).colspan(cherry.getRequirements().size()).expandY();
 
         this.row();
-        this.add(new Image(new Texture("Cherry.png"))).size(600,600).expand().left().bottom().colspan(cherry.getRequirements().size());
-
+        if(isBloodMoon) {
+            this.add(new Image(new Texture("DeanRed3.png"))).size(600,600).expand().left().bottom().colspan(cherry.getRequirements().size());
+        } else {
+            this.add(new Image(new Texture("Cherry.png"))).size(600, 600).expand().left().bottom().colspan(cherry.getRequirements().size());
+        }
         progressBar.setValue(cherry.getCurrentTime());
     }
 }

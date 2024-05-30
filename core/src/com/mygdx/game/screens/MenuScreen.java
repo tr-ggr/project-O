@@ -80,14 +80,14 @@ public class MenuScreen implements Screen {
         Table buttonsLayout = new Table();
         table.add(buttonsLayout).growX().center().padTop(500).padLeft(100).padRight(100);
 
-        TextButton playButton = new TextButton("Play", app.levelskin);
-        TextButton leaderboardButton = new TextButton("Leaderboard", app.levelskin);
+        TextButton playButton = new TextButton("Play", app.progressskin);
+        TextButton leaderboardButton = new TextButton("Leaderboard", app.progressskin);
         buttonsLayout.add(playButton).padRight(150).grow().height(100);
         buttonsLayout.add(leaderboardButton).padLeft(150).grow();
 
         buttonsLayout.row().padTop(50);
-        TextButton creditsButton = new TextButton("Credits", app.levelskin);
-        TextButton logoutButton = new TextButton("Logout", app.levelskin);
+        TextButton creditsButton = new TextButton("Credits", app.progressskin);
+        TextButton logoutButton = new TextButton("Logout", app.progressskin);
         buttonsLayout.add(creditsButton).padRight(150).grow().height(100);
         buttonsLayout.add(logoutButton).padLeft(150).grow();
 
@@ -95,6 +95,13 @@ public class MenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 app.setScreen(new ChooseGameModeScreen(app));
+            }
+        });
+
+        creditsButton.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                app.setScreen(new CreditScreen(app));
             }
         });
 

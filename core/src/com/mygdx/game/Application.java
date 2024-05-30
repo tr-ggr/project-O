@@ -26,6 +26,8 @@ public class Application extends Game {
     public static Music bgm_intro;
     public static Music bgm_game;
     public static Music bgm_dean;
+    public static Music bgm_bloodMoon;
+
 
     //SFX Render
     public static Music sfx_drop;
@@ -47,8 +49,9 @@ public class Application extends Game {
         levelskin = new Skin(Gdx.files.internal("level_plane/level-plane-ui.json"));
 
         bgm_intro = Gdx.audio.newMusic(Gdx.files.internal("bgm/bgm_intro.mp3"));
-        bgm_dean = Gdx.audio.newMusic(Gdx.files.internal("bgm/bgm_dean.mp3"));
+        bgm_dean = Gdx.audio.newMusic(Gdx.files.internal("bgm/bgm_deanSpawn.mp3"));
         bgm_game = Gdx.audio.newMusic(Gdx.files.internal("bgm/bgm_game.mp3"));
+        bgm_bloodMoon = Gdx.audio.newMusic(Gdx.files.internal("bgm/bgm_bloodMoon.mp3"));
 
         sfx_drop = Gdx.audio.newMusic(Gdx.files.internal("sfx/sfx_drop.mp3"));
         sfx_points = Gdx.audio.newMusic(Gdx.files.internal("sfx/sfx_points.mp3"));

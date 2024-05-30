@@ -131,7 +131,7 @@ public class LeaderboardScreen implements Screen {
 
 
         leaderboard.row();
-        Button backButton = new TextButton("Back", app.levelskin);
+        Button backButton = new TextButton("Back", app.progressskin);
         leaderboard.add(backButton).expand().bottom().height(100).growX();
 
 

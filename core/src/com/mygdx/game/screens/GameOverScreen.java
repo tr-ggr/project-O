@@ -108,8 +108,8 @@ public class GameOverScreen implements Screen {
 
 
         buttonsLayout.row();
-        TextButton playerAgainButton = new TextButton("Play Again!", app.levelskin);
-        TextButton backButton = new TextButton("Return to Menu", app.levelskin);
+        TextButton playerAgainButton = new TextButton("Play Again!", app.progressskin);
+        TextButton backButton = new TextButton("Return to Menu", app.progressskin);
         buttonsLayout.add(playerAgainButton).padRight(150).grow().height(100);
         buttonsLayout.add(backButton).padLeft(150).grow();
 

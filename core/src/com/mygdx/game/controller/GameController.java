@@ -59,7 +59,7 @@ public class GameController {
     private NPC Cherry = null;
 
     public enum PHASE {
-        PHASE1, PHASE2, PHASE3;
+        PHASE1, PHASE2, PHASE3, PHASE4;
     }
 
     private Table flexBox;
@@ -72,6 +72,11 @@ public class GameController {
 
 
     public static Controller controller;
+
+    int maxDean = 4;
+
+    float maxDeanTimer = 0f;
+    float maxDeanIncrement = 200f;
 
     public GameController(final Application app){
         lives = 3;
@@ -122,12 +127,11 @@ public class GameController {
 
         if(Gdx.input.isKeyPressed(Input.Keys.SPACE)){
             if(!hasCherry){
-                dean_spawn.play();
-                fadeMusic(bgm_game, bgm_dean);
+                fadeMusic(bgm_game, bgm_bloodMoon);
                 Cherry = new NPC("Cherry", 40, 3);
                 System.out.println("Generated Ma'am Dean NPC!");
                 hasCherry = true;
-                cherryUI.setCherry(Cherry);
+                cherryUI.setCherry(Cherry, true);
                 cherryUI.setVisible(true);
             }
             return;
@@ -141,18 +145,32 @@ public class GameController {
 
 
 //        npcs.add(new NPC("Cherry", 40, 3));
-        if(phase == PHASE.PHASE3){
-            if(random.nextInt(2) == 1 && !hasCherry) {
+        if(phase == PHASE.PHASE4){
+            if(random.nextInt(2) + 1 == 1 && !hasCherry) {
+                Cherry = new NPC("Cherry", 40, random.nextInt(maxDean) + 3);
+                hasCherry = true;
+                cherryUI.setCherry(Cherry, true);
+                cherryUI.setVisible(true);
+                fadeMusic(bgm_game, bgm_bloodMoon);
+            } else {
+                curr = new NPC(npcs.size() + 1 + "", 20, 1);
+                card = new TaskCard(curr.getRequirements().get(0), curr.maxTime);
+                npcs.add(curr);
+                npcCards.add(card);
+                flexBox.add(card).space(10);
+            }
+        }
+        else if(phase == PHASE.PHASE3){
+            if(random.nextInt(2) + 1 == 1 && !hasCherry) {
                 Cherry = new NPC("Cherry", 40, 3);
 //                System.out.println("Generated Ma'am Dean NPC!");
                 hasCherry = true;
-                cherryUI.setCherry(Cherry);
+                cherryUI.setCherry(Cherry, false);
                 cherryUI.setVisible(true);
-                dean_spawn.play();
                 fadeMusic(bgm_game, bgm_dean);
             } else {
 //                System.out.println("Generated a normal NPC!");
-                curr = new NPC(npcs.size() + 1 + "", 25, 1);
+                curr = new NPC(npcs.size() + 1 + "", 20, 1);
                 card = new TaskCard(curr.getRequirements().get(0), curr.maxTime);
                 npcs.add(curr);
                 npcCards.add(card);
@@ -166,13 +184,12 @@ public class GameController {
             npcCards.add(card);
             flexBox.add(card).space(10);
         } else {
-            if(random.nextInt(2) == 1 && !hasCherry) {
+            if(random.nextInt(3) == 1 && !hasCherry) {
                 Cherry = new NPC("Cherry", 40, 2);
 //                System.out.println("Generated Ma'am Dean NPC!");
                 hasCherry = true;
-                cherryUI.setCherry(Cherry);
+                cherryUI.setCherry(Cherry, false);
                 cherryUI.setVisible(true);
-                dean_spawn.play();
                 fadeMusic(bgm_game, bgm_dean);
             } else {
 //                System.out.println("Generated a normal NPC!");
@@ -194,6 +211,7 @@ public class GameController {
 
         timeSeconds += delta;
         timePassed += delta;
+
         if(timeSeconds >= spawnRate){
             generateNPC();
             timeSeconds = 0f;
@@ -202,6 +220,10 @@ public class GameController {
         if(npcs.isEmpty() && timeSeconds >= 10f){
             generateNPC();
             timeSeconds = 0f;
+        }
+
+        if(phase == PHASE.PHASE4){
+            maxDeanTimer += delta;
         }
 
         updateHUD(delta);
@@ -218,13 +240,22 @@ public class GameController {
     }
 
     private void checkPhase(){
-        if(timePassed >= 70 && phase == PHASE.PHASE1){
+        if(timePassed >= 100 && phase == PHASE.PHASE1){
             phase = PHASE.PHASE2;
             spawnRate = 20f;
-        } else if(timePassed >= 150 && phase == PHASE.PHASE2){
+        } else if(timePassed >= 200 && phase == PHASE.PHASE2){
             phase = PHASE.PHASE3;
-            spawnRate = 20f;
+            spawnRate = 15f;
+        } else if(timePassed >= 300 && phase == PHASE.PHASE3){
+            phase = PHASE.PHASE4;
+            spawnRate = 10f;
+        } else if(phase == PHASE.PHASE4){
+            if(maxDeanTimer >= maxDeanIncrement){
+                maxDean++;
+                maxDeanTimer = 0f;
+            }
         }
+
     }
 
     public ArrayList<NPC> getNPCs() {
@@ -245,7 +276,12 @@ public class GameController {
             hasCherry = false;
             cherryUI.setVisible(false);
             lives--;
-            fadeMusic(bgm_dean, bgm_game);
+
+            if(bgm_bloodMoon.isPlaying()){
+                fadeMusic(bgm_bloodMoon, bgm_game);
+            } else {
+                fadeMusic(bgm_dean, bgm_game);
+            }
         }
     }
 
@@ -269,7 +305,11 @@ public class GameController {
             if(Cherry.getRequirements().isEmpty()){
                 hasCherry = false;
                 cherryUI.setVisible(false);
-                fadeMusic(bgm_dean, bgm_game);
+                if(bgm_bloodMoon.isPlaying()){
+                    fadeMusic(bgm_bloodMoon, bgm_game);
+                } else {
+                    fadeMusic(bgm_dean, bgm_game);
+                }
             }
             return true;
         }

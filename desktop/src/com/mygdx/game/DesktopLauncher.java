@@ -20,7 +20,7 @@ public class DesktopLauncher {
 //		config.setResizable(false);
 //		config.setWindowSizeLimits(1920, 1080, 1920, 1080);
 
-		config.setMaximized(true);
+//		config.setMaximized(true);
 
 		DatabaseHelper databaseHelper = DatabaseHelper.getInstance();
 		new Lwjgl3Application(new Application(), config);

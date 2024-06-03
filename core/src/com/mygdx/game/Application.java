@@ -90,7 +90,7 @@ public class Application extends Game {
             @Override
             public void run() {
                 // Fade out
-                for (float i = maxVolume; i >= 0; i -= 0.01f) {
+                for (float i = maxVolume; i >= 1; i -= 0.01f) {
                     music1.setVolume(i);
                     try {
                         Thread.sleep(10); // Pause for 10 milliseconds

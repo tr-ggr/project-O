@@ -43,7 +43,6 @@ public class RegisterScreen implements Screen {
     public RegisterScreen(final Application app) {
         this.app = app;
 
-        VisUI.load();
 
         this.isTransitioning = true;
 
